@@ -79,3 +79,98 @@ Ingress fullname
 {{- define "seleniumGrid.ingress.fullname" -}}
 {{- default "selenium-ingress" .Values.ingress.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
+
+{{/*
+Is autoscaling using KEDA enabled
+*/}}
+{{- define "seleniumGrid.useKEDA" -}}
+{{- or .Values.autoscaling.enabled .Values.autoscaling.enableWithExistingKEDA | ternary "true" "" -}}
+{{- end -}}
+
+
+{{/*
+Common pod template
+*/}}
+{{- define "seleniumGrid.podTemplate" -}}
+template:
+  metadata:
+    labels:
+      app: {{.name}}
+      app.kubernetes.io/name: {{.name}}
+      {{- include "seleniumGrid.commonLabels" . | nindent 6 }}
+      {{- with .node.labels }}
+        {{- toYaml . | nindent 6 }}
+      {{- end }}
+      {{- with .Values.customLabels }}
+        {{- toYaml . | nindent 6 }}
+      {{- end }}
+    annotations:
+      checksum/event-bus-configmap: {{ include (print $.Template.BasePath "/event-bus-configmap.yaml") . | sha256sum }}
+      {{- with .node.annotations }}
+        {{ toYaml . | nindent 6 }}
+      {{- end }}
+  spec:
+    restartPolicy: {{ and .Values.chromeNode.enabled (include "seleniumGrid.useKEDA" .) (eq .Values.autoscaling.scalingType "job") | ternary "Restart" "Always" }}
+  {{- with .node.hostAliases }}
+    hostAliases: {{ toYaml . | nindent 6 }}
+  {{- end }}
+    containers:
+      - name: {{.name}}
+        {{- $imageTag := default .Values.global.seleniumGrid.nodesImageTag .node.imageTag }}
+        image: {{ printf "%s:%s" .node.imageName $imageTag }}
+        imagePullPolicy: {{ .node.imagePullPolicy }}
+      {{- with .node.extraEnvironmentVariables }}
+        env: {{- tpl (toYaml .) $ | nindent 10 }}
+      {{- end }}
+        envFrom:
+          - configMapRef:
+              name: {{ .Values.busConfigMap.name }}
+          {{- with .node.extraEnvFrom }}
+            {{- toYaml . | nindent 10 }}
+          {{- end }}
+      {{- if gt (len .node.ports) 0 }}
+        ports:
+        {{- range .node.ports }}
+          - containerPort: {{ . }}
+            protocol: TCP
+        {{- end }}
+      {{- end }}
+        volumeMounts:
+          - name: dshm
+            mountPath: /dev/shm
+        {{- if .node.extraVolumeMounts }}
+          {{- toYaml .node.extraVolumeMounts | nindent 10 }}
+        {{- end }}
+      {{- with .node.resources }}
+        resources: {{- toYaml . | nindent 10 }}
+      {{- end }}
+      {{- with .node.lifecycle }}
+        lifecycle: {{- tpl (toYaml .) $ | nindent 10 }}
+      {{- end }}
+      {{- with .node.startupProbe }}
+        startupProbe: {{- toYaml . | nindent 10 }}
+      {{- end }}
+  {{- if or .Values.global.seleniumGrid.imagePullSecret .node.imagePullSecret }}
+    imagePullSecrets:
+      - name: {{ default .Values.global.seleniumGrid.imagePullSecret .node.imagePullSecret }}
+  {{- end }}
+  {{- with .node.nodeSelector }}
+    nodeSelector: {{- toYaml . | nindent 6 }}
+  {{- end }}
+  {{- with .node.tolerations }}
+    tolerations:
+      {{ toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .node.priorityClassName }}
+    priorityClassName: {{ . }}
+  {{- end }}
+    terminationGracePeriodSeconds: {{ .node.terminationGracePeriodSeconds }}
+    volumes:
+      - name: dshm
+        emptyDir:
+          medium: Memory
+          sizeLimit: {{ default "1Gi" .node.dshmVolumeSizeLimit }}
+    {{- if .node.extraVolumes }}
+      {{ toYaml .node.extraVolumes | nindent 6 }}
+    {{- end }}
+{{- end -}}

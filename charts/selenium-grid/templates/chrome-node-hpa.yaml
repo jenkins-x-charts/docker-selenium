@@ -1,4 +1,4 @@
-{{- if and .Values.chromeNode.enabled .Values.chromeNode.autoscalingEnabled }}
+{{- if and .Values.chromeNode.enabled (include "seleniumGrid.useKEDA" .) (eq .Values.autoscaling.scalingType "deployment") }}
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
