@@ -1,0 +1,103 @@
+{{- if and .Values.edgeNode.enabled .Values.autoscaling.enabled (eq .Values.autoscaling.scalingType "job") }}
+apiVersion: keda.sh/v1alpha1
+kind: ScaledJob
+metadata:
+  name: {{ template "seleniumGrid.edgeNode.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels: &edge_node_labels
+    app: selenium-edge-node
+    app.kubernetes.io/name: selenium-edge-node
+    {{- include "seleniumGrid.commonLabels" . | nindent 4 }}
+    {{- with .Values.edgeNode.labels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.customLabels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  maxReplicaCount: {{ .Values.edgeNode.maxReplicaCount }}
+  triggers:
+    - type: selenium-grid
+    {{- with .Values.edgeNode.hpa }}
+      metadata: {{- toYaml . | nindent 8 }}
+    {{- end }}
+  jobTargetRef:
+    parallelism: 1
+    completions: 1
+    backoffLimit: 0
+    template:
+      metadata:
+        labels: *edge_node_labels
+        annotations:
+          checksum/event-bus-configmap: {{ include (print $.Template.BasePath "/event-bus-configmap.yaml") . | sha256sum }}
+          {{- with .Values.edgeNode.annotations }}
+            {{ toYaml . | nindent 10 }}
+          {{- end }}
+      spec:
+        restartPolicy: Never
+      {{- with .Values.edgeNode.hostAliases }}
+        hostAliases: {{ toYaml . | nindent 10 }}
+      {{- end }}
+        containers:
+          - name: selenium-edge-node
+            {{- $imageTag := default .Values.global.seleniumGrid.nodesImageTag .Values.edgeNode.imageTag }}
+            image: {{ printf "%s:%s" .Values.edgeNode.imageName $imageTag }}
+            imagePullPolicy: {{ .Values.edgeNode.imagePullPolicy }}
+            env:
+            - name: DRAIN_AFTER_SESSION_COUNT
+              value: "1"
+          {{- with .Values.edgeNode.extraEnvironmentVariables }}
+            {{- tpl (toYaml .) $ | nindent 14 }}
+          {{- end }}
+            envFrom:
+              - configMapRef:
+                  name: {{ .Values.busConfigMap.name }}
+              {{- with .Values.edgeNode.extraEnvFrom }}
+                {{- toYaml . | nindent 14 }}
+              {{- end }}
+          {{- if gt (len .Values.edgeNode.ports) 0 }}
+            ports:
+            {{- range .Values.edgeNode.ports }}
+              - containerPort: {{ . }}
+                protocol: TCP
+            {{- end }}
+          {{- end }}
+            volumeMounts:
+              - name: dshm
+                mountPath: /dev/shm
+            {{- if .Values.edgeNode.extraVolumeMounts }}
+              {{- toYaml .Values.edgeNode.extraVolumeMounts | nindent 14 }}
+            {{- end }}
+          {{- with .Values.edgeNode.resources }}
+            resources: {{- toYaml . | nindent 14 }}
+          {{- end }}
+          {{- with .Values.edgeNode.lifecycle }}
+            lifecycle: {{- toYaml . | nindent 14 }}
+          {{- end }}
+          {{- with .Values.edgeNode.startupProbe }}
+            startupProbe: {{- toYaml . | nindent 14 }}
+          {{- end }}
+      {{- with .Values.edgeNode.nodeSelector }}
+        nodeSelector: {{- toYaml . | nindent 10 }}
+      {{- end }}
+      {{- with .Values.edgeNode.tolerations }}
+        tolerations:
+          {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if or .Values.global.seleniumGrid.imagePullSecret .Values.edgeNode.imagePullSecret }}
+        imagePullSecrets:
+          - name: {{ default .Values.global.seleniumGrid.imagePullSecret .Values.edgeNode.imagePullSecret }}
+      {{- end }}
+      {{- with .Values.edgeNode.priorityClassName }}
+        priorityClassName: {{ . }}
+      {{- end }}
+        terminationGracePeriodSeconds: {{ .Values.edgeNode.terminationGracePeriodSeconds }}
+        volumes:
+          - name: dshm
+            emptyDir:
+              medium: Memory
+              sizeLimit: {{ default "1Gi" .Values.edgeNode.dshmVolumeSizeLimit }}
+        {{- if .Values.edgeNode.extraVolumes }}
+          {{ toYaml .Values.edgeNode.extraVolumes | nindent 10 }}
+        {{- end }}
+{{- end }}

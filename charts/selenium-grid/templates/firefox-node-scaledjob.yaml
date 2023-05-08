@@ -31,12 +31,12 @@ spec:
         annotations:
           checksum/event-bus-configmap: {{ include (print $.Template.BasePath "/event-bus-configmap.yaml") . | sha256sum }}
           {{- with .Values.firefoxNode.annotations }}
-            {{ toYaml . | nindent 8 }}
+            {{ toYaml . | nindent 10 }}
           {{- end }}
       spec:
         restartPolicy: Never
       {{- with .Values.firefoxNode.hostAliases }}
-        hostAliases: {{ toYaml . | nindent 8 }}
+        hostAliases: {{ toYaml . | nindent 10 }}
       {{- end }}
         containers:
           - name: selenium-firefox-node
@@ -47,13 +47,13 @@ spec:
             - name: DRAIN_AFTER_SESSION_COUNT
               value: "1"
             {{- with .Values.firefoxNode.extraEnvironmentVariables }}
-              {{- tpl (toYaml .) $ | nindent 12 }}
+              {{- tpl (toYaml .) $ | nindent 14 }}
             {{- end }}
             envFrom:
               - configMapRef:
                   name: {{ .Values.busConfigMap.name }}
               {{- with .Values.firefoxNode.extraEnvFrom }}
-                {{- toYaml . | nindent 12 }}
+                {{- toYaml . | nindent 14 }}
               {{- end }}
           {{- if gt (len .Values.firefoxNode.ports) 0 }}
             ports:
@@ -66,23 +66,23 @@ spec:
               - name: dshm
                 mountPath: /dev/shm
             {{- if .Values.firefoxNode.extraVolumeMounts }}
-              {{- toYaml .Values.firefoxNode.extraVolumeMounts | nindent 12 }}
+              {{- toYaml .Values.firefoxNode.extraVolumeMounts | nindent 14 }}
             {{- end }}
           {{- with .Values.firefoxNode.resources }}
-            resources: {{- toYaml . | nindent 12 }}
+            resources: {{- toYaml . | nindent 14 }}
           {{- end }}
           {{- with .Values.firefoxNode.lifecycle }}
-            lifecycle: {{- toYaml . | nindent 12 }}
+            lifecycle: {{- toYaml . | nindent 14 }}
           {{- end }}
           {{- with .Values.firefoxNode.startupProbe }}
-            startupProbe: {{- toYaml . | nindent 12 }}
+            startupProbe: {{- toYaml . | nindent 14 }}
           {{- end }}
       {{- with .Values.firefoxNode.nodeSelector }}
-        nodeSelector: {{- toYaml . | nindent 8 }}
+        nodeSelector: {{- toYaml . | nindent 10 }}
       {{- end }}
       {{- with .Values.firefoxNode.tolerations }}
         tolerations:
-          {{ toYaml . | nindent 6 }}
+          {{ toYaml . | nindent 8 }}
       {{- end }}
       {{- if or .Values.global.seleniumGrid.imagePullSecret .Values.firefoxNode.imagePullSecret }}
         imagePullSecrets:
@@ -98,6 +98,6 @@ spec:
               medium: Memory
               sizeLimit: {{ default "1Gi" .Values.firefoxNode.dshmVolumeSizeLimit }}
         {{- if .Values.firefoxNode.extraVolumes }}
-          {{ toYaml .Values.firefoxNode.extraVolumes | nindent 8 }}
+          {{ toYaml .Values.firefoxNode.extraVolumes | nindent 10 }}
         {{- end }}
 {{- end }}
