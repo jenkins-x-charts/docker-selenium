@@ -29,6 +29,15 @@ spec:
             requests:
               cpu: 400m
               memory: 512Mi
+        - image: ghcr.io/jenkins-x/jx-boot:3.10.85
+          name: chart-version
+          resources: {}
+          script: |
+            #!/usr/bin/env sh
+            source .jx/variables.sh
+
+            jx gitops yset -p version -v "$VERSION" -f ./charts/selenium-grid/Chart.yaml
+            yq e -i '.sources = ((.sources // []) + "'$REPO_URL'" | unique)' ./charts/selenium-grid/Chart.yaml
         - name: promote-changelog
           resources: {}
         - name: promote-helm-release
