@@ -1,6 +1,6 @@
-{{- if and .Values.chromeNode.enabled ((eq (include "seleniumGrid.useKEDA" .) "true") | ternary (eq .Values.autoscaling.scalingType "deployment") .Values.chromeNode.deploymentEnabled) }}
-apiVersion: apps/v1
-kind: Deployment
+{{- if and .Values.chromeNode.enabled (include "seleniumGrid.useKEDA" .) (eq .Values.autoscaling.scalingType "job") }}
+apiVersion: keda.sh/v1alpha1
+kind: ScaledJob
 metadata:
   name: {{ template "seleniumGrid.chromeNode.fullname" . }}
   namespace: {{ .Release.Namespace }}
@@ -15,13 +15,21 @@ metadata:
       {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  replicas: {{ .Values.chromeNode.replicas }}
-  selector:
-    matchLabels:
-      app: selenium-chrome-node
-      app.kubernetes.io/instance: {{ .Release.Name }}
+  maxReplicaCount: {{ .Values.chromeNode.maxReplicaCount }}
+  {{- with .Values.chromeNode.scaledJobOptions }}
+    {{ toYaml . | nindent 2 }}
+  {{- end }}
+  triggers:
+    - type: selenium-grid
+    {{- with .Values.chromeNode.hpa }}
+      metadata: {{- toYaml . | nindent 8 }}
+    {{- end }}
+  jobTargetRef:
+    parallelism: 1
+    completions: 1
+    backoffLimit: 0
 {{- $podScope := deepCopy . -}}
 {{- $_ := set $podScope "name" "selenium-chrome-node" -}}
 {{- $_ =  set $podScope "node" .Values.chromeNode  -}}
-{{- include "seleniumGrid.podTemplate" $podScope | nindent 2 }}
+{{- include "seleniumGrid.podTemplate" $podScope | indent 4 }}
 {{- end }}
