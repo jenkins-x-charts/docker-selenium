@@ -16,6 +16,9 @@ metadata:
     {{- end }}
 spec:
   maxReplicaCount: {{ .Values.chromeNode.maxReplicaCount }}
+  {{- with .Values.chromeNode.scaledJobOptions }}
+    {{ toYaml . | nindent 2 }}
+  {{- end }}
   triggers:
     - type: selenium-grid
     {{- with .Values.chromeNode.hpa }}
@@ -31,7 +34,7 @@ spec:
         annotations:
           checksum/event-bus-configmap: {{ include (print $.Template.BasePath "/event-bus-configmap.yaml") . | sha256sum }}
           {{- with .Values.chromeNode.annotations }}
-            {{ toYaml . | nindent 10 }}
+            {{- toYaml . | nindent 10 }}
           {{- end }}
       spec:
         restartPolicy: Never
@@ -47,7 +50,7 @@ spec:
             - name: DRAIN_AFTER_SESSION_COUNT
               value: "1"
           {{- with .Values.chromeNode.extraEnvironmentVariables }}
-            {{- tpl (toYaml .) $ | nindent 14 }}
+            {{- tpl (toYaml .) $ | nindent 12 }}
           {{- end }}
             envFrom:
               - configMapRef:
