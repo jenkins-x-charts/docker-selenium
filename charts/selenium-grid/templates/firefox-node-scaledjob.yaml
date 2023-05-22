@@ -1,10 +1,11 @@
-{{- if and .Values.firefoxNode.enabled .Values.autoscaling.enabled (eq .Values.autoscaling.scalingType "job") }}
+{{- if and .Values.firefoxNode.enabled (include "seleniumGrid.useKEDA" .) (eq .Values.autoscaling.scalingType "job") }}
+{{
 apiVersion: keda.sh/v1alpha1
 kind: ScaledJob
 metadata:
   name: {{ template "seleniumGrid.firefoxNode.fullname" . }}
   namespace: {{ .Release.Namespace }}
-  labels: &firefox_node_labels
+  labels:
     app: selenium-firefox-node
     app.kubernetes.io/name: selenium-firefox-node
     {{- include "seleniumGrid.commonLabels" . | nindent 4 }}
@@ -16,6 +17,9 @@ metadata:
     {{- end }}
 spec:
   maxReplicaCount: {{ .Values.firefoxNode.maxReplicaCount }}
+  {{- with .Values.firefoxNode.scaledJobOptions }}
+    {{ toYaml . | nindent 2 }}
+  {{- end }}
   triggers:
     - type: selenium-grid
     {{- with .Values.firefoxNode.hpa }}
@@ -25,79 +29,8 @@ spec:
     parallelism: 1
     completions: 1
     backoffLimit: 0
-    template:
-      metadata:
-        labels: *firefox_node_labels
-        annotations:
-          checksum/event-bus-configmap: {{ include (print $.Template.BasePath "/event-bus-configmap.yaml") . | sha256sum }}
-          {{- with .Values.firefoxNode.annotations }}
-            {{ toYaml . | nindent 10 }}
-          {{- end }}
-      spec:
-        restartPolicy: Never
-      {{- with .Values.firefoxNode.hostAliases }}
-        hostAliases: {{ toYaml . | nindent 10 }}
-      {{- end }}
-        containers:
-          - name: selenium-firefox-node
-            {{- $imageTag := default .Values.global.seleniumGrid.nodesImageTag .Values.firefoxNode.imageTag }}
-            image: {{ printf "%s:%s" .Values.firefoxNode.imageName $imageTag }}
-            imagePullPolicy: {{ .Values.firefoxNode.imagePullPolicy }}
-            env:
-            - name: DRAIN_AFTER_SESSION_COUNT
-              value: "1"
-            {{- with .Values.firefoxNode.extraEnvironmentVariables }}
-              {{- tpl (toYaml .) $ | nindent 14 }}
-            {{- end }}
-            envFrom:
-              - configMapRef:
-                  name: {{ .Values.busConfigMap.name }}
-              {{- with .Values.firefoxNode.extraEnvFrom }}
-                {{- toYaml . | nindent 14 }}
-              {{- end }}
-          {{- if gt (len .Values.firefoxNode.ports) 0 }}
-            ports:
-            {{- range .Values.firefoxNode.ports }}
-              - containerPort: {{ . }}
-                protocol: TCP
-            {{- end }}
-          {{- end }}
-            volumeMounts:
-              - name: dshm
-                mountPath: /dev/shm
-            {{- if .Values.firefoxNode.extraVolumeMounts }}
-              {{- toYaml .Values.firefoxNode.extraVolumeMounts | nindent 14 }}
-            {{- end }}
-          {{- with .Values.firefoxNode.resources }}
-            resources: {{- toYaml . | nindent 14 }}
-          {{- end }}
-          {{- with .Values.firefoxNode.lifecycle }}
-            lifecycle: {{- toYaml . | nindent 14 }}
-          {{- end }}
-          {{- with .Values.firefoxNode.startupProbe }}
-            startupProbe: {{- toYaml . | nindent 14 }}
-          {{- end }}
-      {{- with .Values.firefoxNode.nodeSelector }}
-        nodeSelector: {{- toYaml . | nindent 10 }}
-      {{- end }}
-      {{- with .Values.firefoxNode.tolerations }}
-        tolerations:
-          {{ toYaml . | nindent 8 }}
-      {{- end }}
-      {{- if or .Values.global.seleniumGrid.imagePullSecret .Values.firefoxNode.imagePullSecret }}
-        imagePullSecrets:
-          - name: {{ default .Values.global.seleniumGrid.imagePullSecret .Values.firefoxNode.imagePullSecret }}
-      {{- end }}
-      {{- with .Values.firefoxNode.priorityClassName }}
-        priorityClassName: {{ . }}
-      {{- end }}
-        terminationGracePeriodSeconds: {{ .Values.firefoxNode.terminationGracePeriodSeconds }}
-        volumes:
-          - name: dshm
-            emptyDir:
-              medium: Memory
-              sizeLimit: {{ default "1Gi" .Values.firefoxNode.dshmVolumeSizeLimit }}
-        {{- if .Values.firefoxNode.extraVolumes }}
-          {{ toYaml .Values.firefoxNode.extraVolumes | nindent 10 }}
-        {{- end }}
+{{- $podScope := deepCopy . -}}
+{{- $_ := set $podScope "name" "selenium-firefox-node" -}}
+{{- $_ =  set $podScope "node" .Values.firefoxNode  -}}
+{{- include "seleniumGrid.podTemplate" $podScope | indent 2 }}
 {{- end }}
