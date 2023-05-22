@@ -374,6 +374,8 @@ chromeNode:
   extraEnvironmentVariables:
   - name: DRAIN_AFTER_SESSION_COUNT
     value: '{{- and (eq (include "seleniumGrid.useKEDA" .) "true") (eq .Values.autoscaling.scalingType "job") | ternary "1" "0" -}}'
+  - name: SE_NODE_GRID_URL
+    value: '{{ include "seleniumGrid.url" .}}'
     # - name: SE_JAVA_OPTS
     #   value: "-Xmx512m"
     # - name:
@@ -500,6 +502,8 @@ firefoxNode:
   extraEnvironmentVariables:
   - name: DRAIN_AFTER_SESSION_COUNT
     value: '{{- and (eq (include "seleniumGrid.useKEDA" .) "true") (eq .Values.autoscaling.scalingType "job") | ternary "1" "0" -}}'
+  - name: SE_NODE_GRID_URL
+    value: '{{ include "seleniumGrid.url" .}}'
     # - name: SE_JAVA_OPTS
     #   value: "-Xmx512m"
     # - name:
@@ -622,6 +626,8 @@ edgeNode:
   extraEnvironmentVariables:
   - name: DRAIN_AFTER_SESSION_COUNT
     value: '{{- and (eq (include "seleniumGrid.useKEDA" .) "true") (eq .Values.autoscaling.scalingType "job") | ternary "1" "0" -}}'
+  - name: SE_NODE_GRID_URL
+    value: '{{ include "seleniumGrid.url" .}}'
     # - name: SE_JAVA_OPTS
     #   value: "-Xmx512m"
     # - name:

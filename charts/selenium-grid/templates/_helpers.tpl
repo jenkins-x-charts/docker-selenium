@@ -174,3 +174,19 @@ template:
       {{ toYaml .node.extraVolumes | nindent 6 }}
     {{- end }}
 {{- end -}}
+
+{{/*
+Get the url of the grid. If the external url can be figured out from the ingress use that, otherwise the cluster internal url
+*/}}
+{{- define "seleniumGrid.url" -}}
+{{- if and .Values.ingress.enabled .Values.ingress.hostname (ne .Values.ingress.hostname "selenium-grid.local") -}}
+http{{if .Values.ingress.tls}}s{{end}}://{{.Values.ingress.hostname}}
+{{- else -}}
+http://
+{{- if $.Values.isolateComponents }}
+{{- template "seleniumGrid.router.fullname" $ }}:{{ $.Values.components.router.port }}
+{{- else }}
+{{- template "seleniumGrid.hub.fullname" $ }}:{{ $.Values.hub.port }}
+{{- end }}
+{{- end }}
+{{- end -}}
