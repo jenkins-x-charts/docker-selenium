@@ -144,8 +144,8 @@ template:
       {{- with .node.resources }}
         resources: {{- toYaml . | nindent 10 }}
       {{- end }}
-      {{- with .node.lifecycle }}
-        lifecycle: {{- tpl (toYaml .) $ | nindent 10 }}
+      {{- if .node.lifecycle }}
+        lifecycle: {{- tpl (toYaml .node.lifecycle) $ | nindent 10 }}
       {{- end }}
       {{- with .node.startupProbe }}
         startupProbe: {{- toYaml . | nindent 10 }}
