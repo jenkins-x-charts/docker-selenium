@@ -373,7 +373,7 @@ chromeNode:
   # Custom environment variables for chrome nodes
   extraEnvironmentVariables:
   - name: DRAIN_AFTER_SESSION_COUNT
-    value: {{- and (include "seleniumGrid.useKEDA" .) (eq .Values.autoscaling.scalingType "job") | ternary "1" "0" -}}
+    value: '{{- and (include "seleniumGrid.useKEDA" .) (eq .Values.autoscaling.scalingType "job") | ternary "1" "0" -}}'
     # - name: SE_JAVA_OPTS
     #   value: "-Xmx512m"
     # - name:
@@ -499,7 +499,7 @@ firefoxNode:
   # Custom environment variables for firefox nodes
   extraEnvironmentVariables:
   - name: DRAIN_AFTER_SESSION_COUNT
-    value: {{- and (include "seleniumGrid.useKEDA" .) (eq .Values.autoscaling.scalingType "job") | ternary "1" "0" -}}
+    value: '{{- and (include "seleniumGrid.useKEDA" .) (eq .Values.autoscaling.scalingType "job") | ternary "1" "0" -}}'
     # - name: SE_JAVA_OPTS
     #   value: "-Xmx512m"
     # - name:
@@ -621,7 +621,7 @@ edgeNode:
   # Custom environment variables for edge nodes
   extraEnvironmentVariables:
   - name: DRAIN_AFTER_SESSION_COUNT
-    value: {{- and (include "seleniumGrid.useKEDA" .) (eq .Values.autoscaling.scalingType "job") | ternary "1" "0" -}}
+    value: '{{- and (include "seleniumGrid.useKEDA" .) (eq .Values.autoscaling.scalingType "job") | ternary "1" "0" -}}'
     # - name: SE_JAVA_OPTS
     #   value: "-Xmx512m"
     # - name:
