@@ -110,7 +110,7 @@ template:
         {{ toYaml . | nindent 6 }}
       {{- end }}
   spec:
-    restartPolicy: {{ and .Values.chromeNode.enabled (include "seleniumGrid.useKEDA" .) (eq .Values.autoscaling.scalingType "job") | ternary "Restart" "Always" }}
+    restartPolicy: {{ and (eq (include "seleniumGrid.useKEDA" .) "true") (eq .Values.autoscaling.scalingType "job") | ternary "Never" "Always" }}
   {{- with .node.hostAliases }}
     hostAliases: {{ toYaml . | nindent 6 }}
   {{- end }}

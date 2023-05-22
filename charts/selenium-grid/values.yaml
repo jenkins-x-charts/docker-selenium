@@ -373,7 +373,7 @@ chromeNode:
   # Custom environment variables for chrome nodes
   extraEnvironmentVariables:
   - name: DRAIN_AFTER_SESSION_COUNT
-    value: '{{- and (include "seleniumGrid.useKEDA" .) (eq .Values.autoscaling.scalingType "job") | ternary "1" "0" -}}'
+    value: '{{- and (eq (include "seleniumGrid.useKEDA" .) "true") (eq .Values.autoscaling.scalingType "job") | ternary "1" "0" -}}'
     # - name: SE_JAVA_OPTS
     #   value: "-Xmx512m"
     # - name:
@@ -499,7 +499,7 @@ firefoxNode:
   # Custom environment variables for firefox nodes
   extraEnvironmentVariables:
   - name: DRAIN_AFTER_SESSION_COUNT
-    value: '{{- and (include "seleniumGrid.useKEDA" .) (eq .Values.autoscaling.scalingType "job") | ternary "1" "0" -}}'
+    value: '{{- and (eq (include "seleniumGrid.useKEDA" .) "true") (eq .Values.autoscaling.scalingType "job") | ternary "1" "0" -}}'
     # - name: SE_JAVA_OPTS
     #   value: "-Xmx512m"
     # - name:
@@ -621,7 +621,7 @@ edgeNode:
   # Custom environment variables for edge nodes
   extraEnvironmentVariables:
   - name: DRAIN_AFTER_SESSION_COUNT
-    value: '{{- and (include "seleniumGrid.useKEDA" .) (eq .Values.autoscaling.scalingType "job") | ternary "1" "0" -}}'
+    value: '{{- and (eq (include "seleniumGrid.useKEDA" .) "true") (eq .Values.autoscaling.scalingType "job") | ternary "1" "0" -}}'
     # - name: SE_JAVA_OPTS
     #   value: "-Xmx512m"
     # - name:
@@ -660,7 +660,7 @@ edgeNode:
   terminationGracePeriodSeconds: 30
   # Allow pod correctly shutdown
   lifecycle: |
-    {{- if and (eq .Values.autoscaling.scalingType "deployment") (include "seleniumGrid.useKEDA" .) -}}
+    {{- if and (eq .Values.autoscaling.scalingType "deployment") (eq (include "seleniumGrid.useKEDA" .) "true") -}}
     preStop:
       exec:
         command:

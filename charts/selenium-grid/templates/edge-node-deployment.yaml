@@ -1,4 +1,4 @@
-{{- if and .Values.edgeNode.enabled ((include "seleniumGrid.useKEDA" .) | ternary (eq .Values.autoscaling.scalingType "deployment") .Values.edgeNode.deploymentEnabled) }}
+{{- if and .Values.edgeNode.enabled ((eq (include "seleniumGrid.useKEDA" .) "true") | ternary (eq .Values.autoscaling.scalingType "deployment") .Values.edgeNode.deploymentEnabled) }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -23,5 +23,5 @@ spec:
 {{- $podScope := deepCopy . -}}
 {{- $_ := set $podScope "name" "selenium-edge-node" -}}
 {{- $_ =  set $podScope "node" .Values.edgeNode  -}}
-{{- include "seleniumGrid.podTemplate" $podScope | indent 2 }}
+{{- include "seleniumGrid.podTemplate" $podScope | nindent 2 }}
 {{- end }}

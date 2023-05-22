@@ -1,5 +1,4 @@
-{{- if and .Values.firefoxNode.enabled (include "seleniumGrid.useKEDA" .) (eq .Values.autoscaling.scalingType "job") }}
-{{
+{{- if and .Values.firefoxNode.enabled (eq (include "seleniumGrid.useKEDA" .) "true") (eq .Values.autoscaling.scalingType "job") }}
 apiVersion: keda.sh/v1alpha1
 kind: ScaledJob
 metadata:
