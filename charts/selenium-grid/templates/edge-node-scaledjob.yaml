@@ -31,5 +31,5 @@ spec:
 {{- $podScope := deepCopy . -}}
 {{- $_ := set $podScope "name" "selenium-edge-node" -}}
 {{- $_ =  set $podScope "node" .Values.edgeNode  -}}
-{{- include "seleniumGrid.podTemplate" $podScope | indent 4 }}
+{{- include "seleniumGrid.podTemplate" $podScope | nindent 4 }}
 {{- end }}
