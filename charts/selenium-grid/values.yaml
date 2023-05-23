@@ -313,6 +313,15 @@ autoscaling:
   # Enable autoscaling without automatically installing KEDA
   enableWithExistingKEDA: false
   scalingType: job
+  deregisterLifecycle:
+    preStop:
+      exec:
+        command:
+          - bash
+          - -c
+          - |
+            curl -X POST 127.0.0.1:5555/se/grid/node/drain --header 'X-REGISTRATION-SECRET;' && \
+            while curl 127.0.0.1:5555/status; do sleep 1; done;
 
 # Configuration for chrome nodes
 chromeNode:
@@ -411,19 +420,7 @@ chromeNode:
     # periodSeconds: 5
   # Time to wait for pod termination
   terminationGracePeriodSeconds: 30
-  # Allow pod correctly shutdown
-  lifecycle: |
-    {{- if and (eq .Values.autoscaling.scalingType "deployment") (include "seleniumGrid.useKEDA" .) -}}
-    preStop:
-      exec:
-        command:
-          - bash
-          - -c
-          - |
-            curl -X POST 127.0.0.1:5555/se/grid/node/drain --header 'X-REGISTRATION-SECRET;' && \
-            while curl 127.0.0.1:5555/status; do sleep 1; done;
-    {{- end -}}
-
+  lifecycle: {}
   extraVolumeMounts: []
   # - name: my-extra-volume
   #   mountPath: /home/seluser/Downloads
@@ -539,19 +536,7 @@ firefoxNode:
     # periodSeconds: 5
   # Time to wait for pod termination
   terminationGracePeriodSeconds: 30
-  # Allow pod correctly shutdown
-  lifecycle: |
-    {{- if and (eq .Values.autoscaling.scalingType "deployment") (include "seleniumGrid.useKEDA" .) -}}
-    preStop:
-      exec:
-        command:
-          - bash
-          - -c
-          - |
-            curl -X POST 127.0.0.1:5555/se/grid/node/drain --header 'X-REGISTRATION-SECRET;' && \
-            while curl 127.0.0.1:5555/status; do sleep 1; done;
-    {{- end -}}
-
+  lifecycle: {}
   extraVolumeMounts: []
   # - name: my-extra-volume
   #   mountPath: /home/seluser/Downloads
@@ -664,18 +649,7 @@ edgeNode:
     # periodSeconds: 5
   # Time to wait for pod termination
   terminationGracePeriodSeconds: 30
-  # Allow pod correctly shutdown
-  lifecycle: |
-    {{- if and (eq .Values.autoscaling.scalingType "deployment") (eq (include "seleniumGrid.useKEDA" .) "true") -}}
-    preStop:
-      exec:
-        command:
-          - bash
-          - -c
-          - |
-            curl -X POST 127.0.0.1:5555/se/grid/node/drain --header 'X-REGISTRATION-SECRET;' && \
-            while curl 127.0.0.1:5555/status; do sleep 1; done;
-    {{- end -}}
+  lifecycle: {}
   extraVolumeMounts: []
   # - name: my-extra-volume
   #   mountPath: /home/seluser/Downloads
