@@ -144,9 +144,7 @@ template:
       {{- with .node.resources }}
         resources: {{- toYaml . | nindent 10 }}
       {{- end }}
-      {{- if .node.lifecycle }}
-        lifecycle: {{- tpl (toYaml .node.lifecycle) $ | nindent 10 }}
-      {{- end }}
+      {{- include "seleniumGrid.lifecycle" . | nindent 8 -}}
       {{- with .node.startupProbe }}
         startupProbe: {{- toYaml . | nindent 10 }}
       {{- end }}
@@ -189,4 +187,15 @@ http://
 {{- template "seleniumGrid.hub.fullname" $ }}:{{ $.Values.hub.port }}
 {{- end }}
 {{- end }}
+{{- end -}}
+
+
+{{- define "seleniumGrid.lifecycle" }}
+{{ $lifecycle := tpl (toYaml (default (dict) .node.lifecycle)) $ }}
+{{- if and (eq .Values.autoscaling.scalingType "deployment") (eq (include "seleniumGrid.useKEDA" .) "true") -}}
+{{ $lifecycle = merge ($lifecycle | fromYaml ) .Values.autoscaling.deregisterLifecycle | toYaml }}
+{{- end -}}
+{{ if and $lifecycle (ne $lifecycle "{}") -}}
+lifecycle: {{ $lifecycle | nindent 2 }}
+{{- end -}}
 {{- end -}}
