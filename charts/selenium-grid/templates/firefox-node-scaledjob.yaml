@@ -31,5 +31,5 @@ spec:
 {{- $podScope := deepCopy . -}}
 {{- $_ := set $podScope "name" "selenium-firefox-node" -}}
 {{- $_ =  set $podScope "node" .Values.firefoxNode  -}}
-{{- include "seleniumGrid.podTemplate" $podScope | nindent 2 }}
+{{- include "seleniumGrid.podTemplate" $podScope | nindent 4 }}
 {{- end }}
