@@ -16,13 +16,13 @@ metadata:
     {{- end }}
 spec:
   maxReplicaCount: {{ .Values.edgeNode.maxReplicaCount }}
-  {{- with .Values.edgeNode.scaledJobOptions }}
+  {{- with .Values.autoscaling.scaledJobOptions -}}
     {{ toYaml . | nindent 2 }}
   {{- end }}
   triggers:
     - type: selenium-grid
     {{- with .Values.edgeNode.hpa }}
-      metadata: {{- toYaml . | nindent 8 }}
+      metadata: {{- tpl (toYaml .) $ | nindent 8 }}
     {{- end }}
   jobTargetRef:
     parallelism: 1
