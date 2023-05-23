@@ -312,7 +312,13 @@ autoscaling:
   enabled: false
   # Enable autoscaling without automatically installing KEDA
   enableWithExistingKEDA: false
+  # Which typ of KEDA scaling to use: job or deployment
   scalingType: job
+  # Options for KEDA ScaledJobs
+  scaledJobOptions:
+    pollingInterval: 10
+    scalingStrategy:
+      strategy: accurate
   deregisterLifecycle:
     preStop:
       exec:
@@ -434,7 +440,7 @@ chromeNode:
 
   maxReplicaCount: 8
   hpa:
-    url: http://selenium-hub:4444/graphql # Replace your http graphql url here
+    url: '{{ include "seleniumGrid.graphqlURL" . }}'
     browserName: chrome
     # browserVersion: '91.0' # Optional. Only required when supporting multiple versions of browser in your Selenium Grid.
     unsafeSsl : 'true' # Optional
@@ -549,7 +555,7 @@ firefoxNode:
   #     claimName: my-pv-claim
   maxReplicaCount: 8
   hpa:
-    url: http://selenium-hub:4444/graphql # Replace your http graphql url here
+    url: '{{ include "seleniumGrid.graphqlURL" . }}'
     browserName: firefox
 
 # Configuration for edge nodes
@@ -662,7 +668,7 @@ edgeNode:
   #     claimName: my-pv-claim
   maxReplicaCount: 8
   hpa:
-    url: http://selenium-hub:4444/graphql # Replace your http graphql url here
+    url: '{{ include "seleniumGrid.graphqlURL" . }}'
     browserName: MicrosoftEdge
     sessionBrowserName: 'msedge'
 

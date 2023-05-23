@@ -16,13 +16,13 @@ metadata:
     {{- end }}
 spec:
   maxReplicaCount: {{ .Values.firefoxNode.maxReplicaCount }}
-  {{- with .Values.firefoxNode.scaledJobOptions }}
+  {{- with .Values.autoscaling.scaledJobOptions -}}
     {{ toYaml . | nindent 2 }}
   {{- end }}
   triggers:
     - type: selenium-grid
     {{- with .Values.firefoxNode.hpa }}
-      metadata: {{- toYaml . | nindent 8 }}
+      metadata: {{- tpl (toYaml .) $ | nindent 8 }}
     {{- end }}
   jobTargetRef:
     parallelism: 1
