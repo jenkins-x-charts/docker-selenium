@@ -146,8 +146,10 @@ This table contains the configuration parameters of the chart and their default 
 | `firefoxNode.annotations`                   | `{}`                                        | Annotations for firefox-node pods                                                                                          |
 | `firefoxNode.labels`                        | `{}`                                        | Labels for firefox-node pods                                                                                               |
 | `firefoxNode.resources`                     | `See values.yaml`                           | Resources for firefox-node pods                                                                                            |
+| `firefoxNode.securityContext`               | `See values.yaml`                           | Security context for firefox-node pods                                                                                     |
 | `firefoxNode.tolerations`                   | `[]`                                        | Tolerations for firefox-node pods                                                                                          |
 | `firefoxNode.nodeSelector`                  | `{}`                                        | Node Selector for firefox-node pods                                                                                        |
+| `firefoxNode.affinity`                      | `{}`                                        | Affinity for firefox-node pods                                                                                             |
 | `firefoxNode.hostAliases`                   | `nil`                                       | Custom host aliases for firefox nodes                                                                                      |
 | `firefoxNode.priorityClassName`             | `""`                                        | Priority class name for firefox-node pods                                                                                  |
 | `firefoxNode.extraEnvironmentVariables`     | See `values.yaml`                           | Environment variables for firefox nodes                                                                                    |
@@ -178,8 +180,10 @@ This table contains the configuration parameters of the chart and their default 
 | `edgeNode.annotations`                      | `{}`                                        | Annotations for edge-node pods                                                                                             |
 | `edgeNode.labels`                           | `{}`                                        | Labels for edge-node pods                                                                                                  |
 | `edgeNode.resources`                        | `See values.yaml`                           | Resources for edge-node pods                                                                                               |
+| `edgeNode.securityContext`                  | `See values.yaml`                           | Security context for edge-node pods                                                                                        |
 | `edgeNode.tolerations`                      | `[]`                                        | Tolerations for edge-node pods                                                                                             |
 | `edgeNode.nodeSelector`                     | `{}`                                        | Node Selector for edge-node pods                                                                                           |
+| `edgeNode.affinity`                         | `{}`                                        | Affinity for edge-node pods                                                                                                |
 | `edgeNode.hostAliases`                      | `nil`                                       | Custom host aliases for edge nodes                                                                                         |
 | `edgeNode.priorityClassName`                | `""`                                        | Priority class name for edge-node pods                                                                                     |
 | `edgeNode.extraEnvironmentVariables`        | See `values.yaml`                           | Environment variables for firefox nodes                                                                                    |
@@ -203,9 +207,10 @@ This table contains the configuration parameters of the chart and their default 
 
 ### Configuration of KEDA
 
-If you are setting `autoscaling.enabled` to `true` KEDA is installed and can be configured with the
-values with the prefix `keda.`. See https://github.com/kedacore/charts/blob/main/keda/README.md for
-more details.
+If you are setting `autoscaling.enabled` to `true` KEDA is installed and can be configured with
+values with the prefix `keda`. So you can for example set `keda.prometheus.metricServer.enabled` to
+`true` to enable the metrics server for KEDA.  See
+https://github.com/kedacore/charts/blob/main/keda/README.md for more details.
 
 ### Configuration for Selenium-Hub
 
