@@ -6,7 +6,7 @@ metadata:
 data:
   video.sh: |
     #!/usr/bin/env bash
-    set -ex
+    set -exm
     #apt-get update
     #apt-get -qqy --no-install-recommends install curl jq x11-utils
 
