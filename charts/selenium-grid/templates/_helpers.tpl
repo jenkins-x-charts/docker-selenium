@@ -180,7 +180,7 @@ template:
         - name: dshm
           mountPath: /dev/shm
         - name: video-scripts
-          mountPath: /opt/bin
+          mountPath: /opt/bin/video.sh
           subPath: video.sh
         - name: video
           mountPath: /videos
