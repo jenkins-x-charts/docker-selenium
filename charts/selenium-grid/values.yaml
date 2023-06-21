@@ -708,15 +708,8 @@ videoRecorder:
       value: "5900"
     # - name: VIDEO_LOCATION
     #   value: /tmp
-    # - name: AWS_ACCESS_KEY_ID
-    #   value: aws_access_key_id
-    # - name: AWS_SECRET_ACCESS_KEY
-    #   value: aws_secret_access_key
-    # - name:
-    #   valueFrom:
-    #     secretKeyRef:
-    #       name: secret-name
-    #       key: secret-key
+    # - name: UPLOAD_DESTINATION_FOLDER
+    #   value: s3://myvideobucket/
   # Custom environment variables by sourcing entire configMap, Secret, etc. for video recorder.
   extraEnvFrom:
     # - configMapRef:
@@ -730,6 +723,7 @@ videoRecorder:
   s3:
     imageName: public.ecr.aws/bitnami/aws-cli
     imageTag: "2"
+    imagePullPolicy: IfNotPresent
     command:
     - /bin/sh
     args:
