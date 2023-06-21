@@ -7,8 +7,8 @@ data:
   video.sh: |
     #!/usr/bin/env bash
     set -ex
-    apt-get update
-    apt-get -qqy --no-install-recommends install curl jq x11-utils
+    #apt-get update
+    #apt-get -qqy --no-install-recommends install curl jq x11-utils
 
     DISPLAY_CONTAINER_NAME=localhost
     DISPLAY_NUM=${DISPLAY_NUM}
