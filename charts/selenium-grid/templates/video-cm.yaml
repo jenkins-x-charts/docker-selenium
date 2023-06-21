@@ -41,9 +41,12 @@ data:
     video_file_name=""
     video_file=""
     upload_destination=""
-    while sleep 1
+    until curl -s --request GET 'http://'${DISPLAY_CONTAINER_NAME:-localhost}':'${DISPLAY_CONTAINER_PORT:-5555}'/status'
     do
-        curl -s --request GET 'http://'${DISPLAY_CONTAINER_NAME:-localhost}':'${DISPLAY_CONTAINER_PORT:-5555}'/status' > /tmp/status.json || continue
+        sleep 1
+    done
+    while curl -s --request GET 'http://'${DISPLAY_CONTAINER_NAME:-localhost}':'${DISPLAY_CONTAINER_PORT:-5555}'/status' > /tmp/status.json
+    do
         cat /tmp/status.json
         session_id=$(jq -r '.[]?.node?.slots | .[0]?.session?.sessionId' /tmp/status.json)
         echo $session_id
