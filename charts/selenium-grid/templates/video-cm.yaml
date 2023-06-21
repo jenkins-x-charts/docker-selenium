@@ -95,4 +95,5 @@ data:
         fi
     done
     rm  /videos/uploadpipe
+    kill -s SIGINT `cat /var/run/supervisor/supervisord.pid`
 {{- end }}
