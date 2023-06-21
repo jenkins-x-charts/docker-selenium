@@ -22,7 +22,7 @@ data:
     attempts=0
     mkfifo /videos/uploadpipe
     echo 'Checking if the display is open...'
-    until [ $attempts -eq $max_attempts ]
+    until [[ $attempts = $max_attempts ]]
     do
         if xset b off
         then
@@ -47,15 +47,15 @@ data:
         cat /tmp/status.json
         session_id=$(jq -r '.[]?.node?.slots | .[0]?.session?.sessionId' /tmp/status.json)
         echo $session_id
-        if [ "$session_id" != "null" -a "$session_id" != "" -a $session_detected = "false" ]
+        if [[ "$session_id" != "null" && "$session_id" != "" && "$session_detected" = "false" ]]
         then
             session_detected="true"
             video_file_name="$session_id.mp4"
             video_file="${VIDEO_LOCATION:-$video_location_default}/$video_file_name"
             upload_destination=$(jq -r '.[]?.node?.slots | .[0]?.session?.capabilities["video:uploadDestination"]' /tmp/status.json)
-            if [ "$upload_destination" = "" ]
+            if [[ "$upload_destination" = "" ]]
             then
-              if ["$UPLOAD_DESTINATION_FOLDER" != "" ]
+              if [[ "$UPLOAD_DESTINATION_FOLDER" != "" ]]
               then
                 upload_destination=${UPLOAD_DESTINATION_FOLDER}${video_file_name}
               else
@@ -69,7 +69,7 @@ data:
             ffmpeg -nostdin -y -f x11grab -video_size ${VIDEO_SIZE} -r ${FRAME_RATE} -i ${DISPLAY} -codec:v ${CODEC} ${PRESET} -pix_fmt yuv420p $video_file &
             recording_started="true"
             echo "Video recording started"
-        elif [ "$session_id" = "null" -o "$session_id" = "" -a $session_detected = "true" ]
+        elif [[ ( "$session_id" = "null" || "$session_id" = "" ) && "$session_detected" = "true" ]]
         then
             if [ $recording_started = "true" ]
             then
@@ -81,10 +81,10 @@ data:
             fi
             session_detected="false"
             echo "Video recording stopped"
-        elif [ $recording_started = "true" ];
+        elif [[ $recording_started = "true" ]]
         then
             echo "Video recording in progress"
-        elif [ $session_detected = "true" ];
+        elif [[ $session_detected = "true" ]]
         then
             echo "Ignored session in progress"
         else
