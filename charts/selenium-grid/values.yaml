@@ -735,7 +735,7 @@ videoRecorder:
         sleep 1
       done
       echo Waiting for file to upload
-      read FILE DESTINATION /videos/uploadpipe
+      read FILE DESTINATION < /videos/uploadpipe
       aws s3 cp --no-progress $FILE $DESTINATION
   # extraEnvironmentVariables:
   # - name: AWS_ACCESS_KEY_ID

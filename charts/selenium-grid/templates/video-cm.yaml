@@ -10,7 +10,7 @@ data:
     apt-get update
     apt-get -qqy --no-install-recommends install curl jq x11-utils
 
-    DISPLAY_CONTAINER_NAME=${DISPLAY_CONTAINER_NAME}
+    DISPLAY_CONTAINER_NAME=localhost
     DISPLAY_NUM=${DISPLAY_NUM}
     FRAME_RATE=${FRAME_RATE:-$SE_FRAME_RATE}
     CODEC=${CODEC:-$SE_CODEC}
@@ -41,9 +41,9 @@ data:
     video_file_name=""
     video_file=""
     upload_destination=""
-    while true;
+    while sleep 1
     do
-        curl -s --request GET 'http://'${DISPLAY_CONTAINER_NAME:-localhost}':'${DISPLAY_CONTAINER_PORT}'/status' > /tmp/status.json
+        curl -s --request GET 'http://'${DISPLAY_CONTAINER_NAME:-localhost}':'${DISPLAY_CONTAINER_PORT:-5555}'/status' > /tmp/status.json || continue
         cat /tmp/status.json
         session_id=$(jq -r '.[]?.node?.slots | .[0]?.session?.sessionId' /tmp/status.json)
         echo $session_id
@@ -90,6 +90,5 @@ data:
         else
             echo "No session in progress"
         fi
-        sleep 1
     done
 {{- end }}
