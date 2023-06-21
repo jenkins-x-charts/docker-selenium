@@ -181,6 +181,7 @@ template:
           mountPath: /dev/shm
         - name: video-scripts
           mountPath: /opt/bin
+          subPath: video.sh
         - name: video
           mountPath: /videos
       {{- if .Values.videoRecorder.extraVolumeMounts }}
