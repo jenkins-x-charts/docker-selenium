@@ -161,7 +161,7 @@ template:
         image: {{ printf "%s:%s" .Values.videoRecorder.imageName .Values.videoRecorder.imageTag }}
         imagePullPolicy: {{ .Values.videoRecorder.imagePullPolicy }}
       {{- with .Values.videoRecorder.extraEnvironmentVariables }}
-        env: {{- tpl (toYaml .) $ | nindent 12 }}
+        env: {{- tpl (toYaml .) $ | nindent 8 }}
       {{- end }}
         envFrom:
         - configMapRef:

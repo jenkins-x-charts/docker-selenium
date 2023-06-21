@@ -6,7 +6,9 @@ metadata:
 data:
   video.sh: |
     #!/usr/bin/env bash
-    apt-get -qqy --no-install-recommends install curl jq
+    set -ex
+    apt-get update
+    apt-get -qqy --no-install-recommends install curl jq x11-utils
 
     DISPLAY_CONTAINER_NAME=${DISPLAY_CONTAINER_NAME}
     DISPLAY_NUM=${DISPLAY_NUM}
@@ -20,12 +22,12 @@ data:
     attempts=0
     mkfifo /videos/uploadpipe
     echo 'Checking if the display is open...'
-    until [ $return_code -eq 0 -o $attempts -eq $max_attempts ]
+    until [ $attempts -eq $max_attempts ]
     do
-        xset b off > /dev/null 2>&1
-        return_code=$?
-        if [ $return_code -ne 0 ]
+        if xset b off
         then
+            break
+        else
             echo 'Waiting before next display check...'
             sleep 0.5
         fi
