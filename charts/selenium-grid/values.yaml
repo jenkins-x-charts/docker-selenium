@@ -702,10 +702,10 @@ videoRecorder:
       memory: "1Gi"
       cpu: "1"
   extraEnvironmentVariables:
-    - name: DISPLAY_CONTAINER_NAME
-      value: localhost
-    - name: DISPLAY_CONTAINER_PORT
-      value: "5900"
+  - name: DISPLAY_CONTAINER_NAME
+    value: localhost
+  - name: DISPLAY_CONTAINER_PORT
+    value: "5900"
     # - name: VIDEO_LOCATION
     #   value: /tmp
     # - name: UPLOAD_DESTINATION_FOLDER
