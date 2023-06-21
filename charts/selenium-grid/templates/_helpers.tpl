@@ -81,6 +81,13 @@ Ingress fullname
 {{- end -}}
 
 {{/*
+Video ConfigMap fullname
+*/}}
+{{- define "seleniumGrid.video.fullname" -}}
+{{- default "selenium-video" .Values.videoRecorder.nameOverride | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
 Is autoscaling using KEDA enabled
 */}}
 {{- define "seleniumGrid.useKEDA" -}}
@@ -111,6 +118,7 @@ template:
       {{- end }}
   spec:
     restartPolicy: {{ and (eq (include "seleniumGrid.useKEDA" .) "true") (eq .Values.autoscaling.scalingType "job") | ternary "Never" "Always" }}
+    serviceAccount: {{ .Values.serviceAccount.name }}
   {{- with .node.hostAliases }}
     hostAliases: {{ toYaml . | nindent 6 }}
   {{- end }}
@@ -148,6 +156,63 @@ template:
       {{- with .node.startupProbe }}
         startupProbe: {{- toYaml . | nindent 10 }}
       {{- end }}
+    {{- if .Values.videoRecorder.enabled }}
+      - name: video
+        {{- $imageTag := .Values.videoRecorder.imageTag }}
+        image: {{ printf "%s:%s" .Values.videoRecorder.imageName $imageTag }}
+        imagePullPolicy: {{ .Values.videoRecorder.imagePullPolicy }}
+      {{- with .Values.videoRecorder.extraEnvironmentVariables }}
+        env: {{- tpl (toYaml .) $ | nindent 12 }}
+      {{- end }}
+        envFrom:
+        - configMapRef:
+            name: {{ .Values.busConfigMap.name }}
+      {{- with .Values.videoRecorder.extraEnvFrom }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if gt (len .Values.videoRecorder.ports) 0 }}
+        ports:
+      {{- range .Values.videoRecorder.ports }}
+        - containerPort: {{ . }}
+          protocol: TCP
+      {{- end }}
+      {{- end }}
+        volumeMounts:
+        - name: dshm
+          mountPath: /dev/shm
+        - name: video-scripts
+          mountPath: /opt/bin
+        - name: video
+          mountPath: /videos
+      {{- if .Values.videoRecorder.extraVolumeMounts }}
+        {{- toYaml .Values.videoRecorder.extraVolumeMounts | nindent 8 }}
+      {{- end }}
+      {{- with .Values.videoRecorder.resources }}
+        resources: {{- toYaml . | nindent 10 }}
+      {{- end }}
+    {{- if .uploader }}
+      - name: uploader
+        {{- $imageTag := .uploader.imageTag }}
+        image: {{ printf "%s:%s" .uploader.imageName $imageTag }}
+        imagePullPolicy: {{ .uploader.imagePullPolicy }}
+      {{- with .uploader.extraEnvironmentVariables }}
+        env: {{- tpl (toYaml .) $ | nindent 10 }}
+      {{- end }}
+        envFrom:
+        {{- with .uploader.extraEnvFrom }}
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        volumeMounts:
+        - name: video
+          mountPath: /videos
+      {{- if .uploader.extraVolumeMounts }}
+        {{- toYaml .uploader.extraVolumeMounts | nindent 8 }}
+      {{- end }}
+      {{- with .uploader.resources }}
+        resources: {{- toYaml . | nindent 10 }}
+      {{- end }}
+    {{- end }}
+    {{- end }}
   {{- if or .Values.global.seleniumGrid.imagePullSecret .node.imagePullSecret }}
     imagePullSecrets:
       - name: {{ default .Values.global.seleniumGrid.imagePullSecret .node.imagePullSecret }}
@@ -170,6 +235,14 @@ template:
           sizeLimit: {{ default "1Gi" .node.dshmVolumeSizeLimit }}
     {{- if .node.extraVolumes }}
       {{ toYaml .node.extraVolumes | nindent 6 }}
+    {{- end }}
+    {{- if .Values.videoRecorder.enabled }}
+      - name: video-scripts
+        configMap:
+          name: {{ template "seleniumGrid.video.fullname" . }}
+          defaultMode: 0500
+      - name: video
+      {{ toYaml .Values.videoRecorder.volume | indent 8 }}    
     {{- end }}
 {{- end -}}
 
