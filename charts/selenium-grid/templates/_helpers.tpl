@@ -158,8 +158,7 @@ template:
       {{- end }}
     {{- if .Values.videoRecorder.enabled }}
       - name: video
-        {{- $imageTag := .Values.videoRecorder.imageTag }}
-        image: {{ printf "%s:%s" .Values.videoRecorder.imageName $imageTag }}
+        image: {{ printf "%s:%s" .Values.videoRecorder.imageName .Values.videoRecorder.imageTag }}
         imagePullPolicy: {{ .Values.videoRecorder.imagePullPolicy }}
       {{- with .Values.videoRecorder.extraEnvironmentVariables }}
         env: {{- tpl (toYaml .) $ | nindent 12 }}
@@ -192,14 +191,19 @@ template:
       {{- end }}
     {{- if .uploader }}
       - name: uploader
-        {{- $imageTag := .uploader.imageTag }}
-        image: {{ printf "%s:%s" .uploader.imageName $imageTag }}
+        image: {{ printf "%s:%s" .uploader.imageName .uploader.imageTag }}
         imagePullPolicy: {{ .uploader.imagePullPolicy }}
-      {{- with .uploader.extraEnvironmentVariables }}
-        env: {{- tpl (toYaml .) $ | nindent 10 }}
+      {{- with .uploader.command }}
+        command: {{- tpl (toYaml .) $ | nindent 8 }}
       {{- end }}
-        envFrom:
+      {{- with .uploader.args }}
+        args: {{- tpl (toYaml .) $ | nindent 8 }}
+      {{- end }}
+      {{- with .uploader.extraEnvironmentVariables }}
+        env: {{- tpl (toYaml .) $ | nindent 8 }}
+      {{- end }}
         {{- with .uploader.extraEnvFrom }}
+        envFrom:
           {{- toYaml . | nindent 10 }}
         {{- end }}
         volumeMounts:
@@ -229,21 +233,21 @@ template:
   {{- end }}
     terminationGracePeriodSeconds: {{ .node.terminationGracePeriodSeconds }}
     volumes:
-      - name: dshm
-        emptyDir:
-          medium: Memory
-          sizeLimit: {{ default "1Gi" .node.dshmVolumeSizeLimit }}
-    {{- if .node.extraVolumes }}
-      {{ toYaml .node.extraVolumes | nindent 6 }}
-    {{- end }}
-    {{- if .Values.videoRecorder.enabled }}
-      - name: video-scripts
-        configMap:
-          name: {{ template "seleniumGrid.video.fullname" . }}
-          defaultMode: 0500
-      - name: video
-      {{ toYaml .Values.videoRecorder.volume | indent 8 }}    
-    {{- end }}
+    - name: dshm
+      emptyDir:
+        medium: Memory
+        sizeLimit: {{ default "1Gi" .node.dshmVolumeSizeLimit }}
+  {{- if .node.extraVolumes }}
+    {{ toYaml .node.extraVolumes | nindent 4 }}
+  {{- end }}
+  {{- if .Values.videoRecorder.enabled }}
+    - name: video-scripts
+      configMap:
+        name: {{ template "seleniumGrid.video.fullname" . }}
+        defaultMode: 0500
+    - name: video
+    {{- toYaml .Values.videoRecorder.volume | nindent 6 }}
+  {{- end }}
 {{- end -}}
 
 {{/*
