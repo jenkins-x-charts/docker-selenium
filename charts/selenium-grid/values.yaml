@@ -701,15 +701,15 @@ videoRecorder:
     limits:
       memory: "1Gi"
       cpu: "1"
-  extraEnvironmentVariables:
-  - name: DISPLAY_CONTAINER_NAME
-    value: localhost
-  - name: DISPLAY_CONTAINER_PORT
-    value: "5900"
-    # - name: VIDEO_LOCATION
-    #   value: /tmp
-    # - name: UPLOAD_DESTINATION_FOLDER
-    #   value: s3://myvideobucket/
+  extraEnvironmentVariables: []
+  # - name: UPLOAD_DESTINATION_FOLDER
+  #   value: s3://myvideobucket/
+  # - name: DISPLAY_CONTAINER_NAME
+  #   value: localhost
+  # - name: DISPLAY_CONTAINER_PORT
+  #   value: "5555"
+  # - name: VIDEO_LOCATION
+  #   value: /videos
   # Custom environment variables by sourcing entire configMap, Secret, etc. for video recorder.
   extraEnvFrom:
     # - configMapRef:
@@ -724,6 +724,8 @@ videoRecorder:
     imageName: public.ecr.aws/bitnami/aws-cli
     imageTag: "2"
     imagePullPolicy: IfNotPresent
+    securityContext:
+      runAsUser: 0
     command:
     - /bin/sh
     args:

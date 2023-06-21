@@ -216,6 +216,9 @@ template:
       {{- with .uploader.resources }}
         resources: {{- toYaml . | nindent 10 }}
       {{- end }}
+      {{- with .uploader.securityContext }}
+        securityContext: {{- toYaml . | nindent 10 }}
+      {{- end }}
     {{- end }}
     {{- end }}
   {{- if or .Values.global.seleniumGrid.imagePullSecret .node.imagePullSecret }}
