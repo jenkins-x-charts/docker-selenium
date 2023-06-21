@@ -53,15 +53,15 @@ data:
             video_file_name="$session_id.mp4"
             video_file="${VIDEO_LOCATION:-$video_location_default}/$video_file_name"
             upload_destination=$(jq -r '.[]?.node?.slots | .[0]?.session?.capabilities["video:uploadDestination"]' /tmp/status.json)
-            if [[ "$upload_destination" = "" ]]
+            if [[ "$upload_destination" = "" || "$upload_destination" = "null" ]]
             then
-              if [[ "$UPLOAD_DESTINATION_FOLDER" != "" ]]
+              if [[ "$UPLOAD_DESTINATION_FOLDER" = "" ]]
               then
-                upload_destination=${UPLOAD_DESTINATION_FOLDER}${video_file_name}
-              else
                 echo "No upload destination found. Skipping recording of session $session_id"
                 sleep 2
                 continue
+              else
+                upload_destination=${UPLOAD_DESTINATION_FOLDER}${video_file_name}
               fi
             fi
             echo "Upload destination is $upload_destination"
