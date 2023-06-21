@@ -75,7 +75,7 @@ data:
             then
               echo "Stopping to record video"
               kill -INT %1
-              fg
+              fg || echo ffmpeg exited with code $?
               echo $video_file $upload_destination > /videos/uploadpipe &
               recording_started="false"
             fi
