@@ -56,7 +56,6 @@ data:
     done
     while curl -s --request GET 'http://'${DISPLAY_CONTAINER_NAME:-localhost}':'${DISPLAY_CONTAINER_PORT:-5555}'/status' > /tmp/status.json
     do
-        cat /tmp/status.json
         session_id=$(jq -r '.[]?.node?.slots | .[0]?.session?.sessionId' /tmp/status.json)
         echo $session_id
         if [[ "$session_id" != "null" && "$session_id" != "" && "$session_detected" = "false" ]]
@@ -64,6 +63,7 @@ data:
             session_detected="true"
             video_file_name="$session_id.mp4"
             video_file="${VIDEO_LOCATION:-$video_location_default}/$video_file_name"
+            cat /tmp/status.json
             upload_destination=$(jq -r '.[]?.node?.slots | .[0]?.session?.capabilities["video:uploadDestination"]' /tmp/status.json)
             if [[ "$upload_destination" = "" || "$upload_destination" = "null" ]]
             then
