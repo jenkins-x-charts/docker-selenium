@@ -6,10 +6,14 @@ metadata:
 data:
   video.sh: |
     #!/usr/bin/env bash
-    set -exm
+    set -em
     #apt-get update
     #apt-get -qqy --no-install-recommends install curl jq x11-utils
-
+    function finish {
+        rm -f /videos/uploadpipe
+        kill -s SIGINT `cat /var/run/supervisor/supervisord.pid`
+    }
+    trap finish EXIT
     DISPLAY_CONTAINER_NAME=localhost
     DISPLAY_NUM=${DISPLAY_NUM}
     FRAME_RATE=${FRAME_RATE:-$SE_FRAME_RATE}
@@ -36,8 +40,7 @@ data:
     if [[ $attempts = $max_attempts ]]
     then
         echo Can not open display, exiting.
-        mkfifo /videos/uploadpipe
-        kill -s SIGINT `cat /var/run/supervisor/supervisord.pid`
+        exit
     fi
     VIDEO_SIZE=$(xdpyinfo | grep 'dimensions:' | awk '{print $2}')
 
@@ -100,6 +103,4 @@ data:
             echo "No session in progress"
         fi
     done
-    rm  /videos/uploadpipe
-    kill -s SIGINT `cat /var/run/supervisor/supervisord.pid`
 {{- end }}
