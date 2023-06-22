@@ -733,12 +733,19 @@ videoRecorder:
     - |
       while ! [ -p /videos/uploadpipe ]
       do
-        echo Waiting for /videos/uploadpipe to be created
-        sleep 1
+          echo Waiting for /videos/uploadpipe to be created
+          sleep 1
       done
-      echo Waiting for file to upload
-      read FILE DESTINATION < /videos/uploadpipe
-      aws s3 cp --no-progress $FILE $DESTINATION
+      echo Waiting for files to upload
+      while read FILE DESTINATION < /videos/uploadpipe
+      do
+          if [ "$FILE" -= "exit" ]
+          then
+              break
+          else
+              aws s3 cp --no-progress $FILE $DESTINATION
+          fi
+      done
   # extraEnvironmentVariables:
   # - name: AWS_ACCESS_KEY_ID
   #   value: aws_access_key_id
