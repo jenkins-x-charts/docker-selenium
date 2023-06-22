@@ -102,5 +102,6 @@ data:
         else
             echo "No session in progress"
         fi
+        sleep 1
     done
 {{- end }}
