@@ -10,7 +10,7 @@ data:
     #apt-get update
     #apt-get -qqy --no-install-recommends install curl jq x11-utils
     function finish {
-        rm -f /videos/uploadpipe
+        echo exit > /videos/uploadpipe
         kill -s SIGINT `cat /var/run/supervisor/supervisord.pid`
     }
     trap finish EXIT
