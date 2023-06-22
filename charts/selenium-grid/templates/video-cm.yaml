@@ -18,7 +18,7 @@ data:
     export DISPLAY=${DISPLAY_CONTAINER_NAME}:${DISPLAY_NUM}.0
 
     return_code=1
-    max_attempts=50
+    max_attempts=600
     attempts=0
     mkfifo /videos/uploadpipe
     echo 'Checking if the display is open...'
@@ -33,6 +33,12 @@ data:
         fi
         attempts=$((attempts+1))
     done
+    if [[ $attempts = $max_attempts ]]
+    then
+        echo Can not open display, exiting.
+        mkfifo /videos/uploadpipe
+        kill -s SIGINT `cat /var/run/supervisor/supervisord.pid`
+    fi
     VIDEO_SIZE=$(xdpyinfo | grep 'dimensions:' | awk '{print $2}')
 
     video_location_default=/videos
