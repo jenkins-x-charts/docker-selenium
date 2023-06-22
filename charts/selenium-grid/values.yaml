@@ -739,7 +739,7 @@ videoRecorder:
       echo Waiting for files to upload
       while read FILE DESTINATION < /videos/uploadpipe
       do
-          if [ "$FILE" -= "exit" ]
+          if [ "$FILE" = "exit" ]
           then
               break
           else
