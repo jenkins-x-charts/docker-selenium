@@ -133,6 +133,8 @@ template:
         envFrom:
           - configMapRef:
               name: {{ .Values.busConfigMap.name }}
+          - configMapRef:
+              name: {{ .Values.nodeConfigMap.name }}
           {{- with .node.extraEnvFrom }}
             {{- toYaml . | nindent 10 }}
           {{- end }}
@@ -160,8 +162,11 @@ template:
       - name: video
         image: {{ printf "%s:%s" .Values.videoRecorder.imageName .Values.videoRecorder.imageTag }}
         imagePullPolicy: {{ .Values.videoRecorder.imagePullPolicy }}
+        env:
+        - name: UPLOAD_DESTINATION_PREFIX
+          value: {{ .Values.videRecorder.uploadDestinationPrefix }}
       {{- with .Values.videoRecorder.extraEnvironmentVariables }}
-        env: {{- tpl (toYaml .) $ | nindent 8 }}
+        {{- tpl (toYaml .) $ | nindent 8 }}
       {{- end }}
         envFrom:
         - configMapRef:

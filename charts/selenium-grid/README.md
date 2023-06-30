@@ -75,11 +75,11 @@ For now, global configuration supported is:
 
 | Parameter                             | Default                            | Description                           |
 | -----------------------------------   | ---------------------------------- | ------------------------------------- |
-| `global.seleniumGrid.imageTag`        | `4.9.1-20230508`                   | Image tag for all selenium components |
-| `global.seleniumGrid.nodesImageTag`   | `4.9.1-20230508`                   | Image tag for browser's nodes         |
+| `global.seleniumGrid.imageTag`        | `4.10.0-20230607`                  | Image tag for all selenium components |
+| `global.seleniumGrid.nodesImageTag`   | `4.10.0-20230607`                  | Image tag for browser's nodes         |
 | `global.seleniumGrid.imagePullSecret` | `""`                               | Pull secret to be used for all images |
 | `global.seleniumGrid.imagePullSecret` | `""`                               | Pull secret to be used for all images |
-| `global.seleniumGrid.affinity`        | `{}`                               | Affinity assigned globally |
+| `global.seleniumGrid.affinity`        | `{}`                               | Affinity assigned globally            |
 
 This table contains the configuration parameters of the chart and their default values:
 
@@ -87,13 +87,15 @@ This table contains the configuration parameters of the chart and their default 
 | ---------------------------------------     | ----------------------------------          | -------------------------------------------------------------------------------------------------------------------------- |
 | `isolateComponents`                         | `false`                                     | Deploy Router, Distributor, EventBus, SessionMap and Nodes separately                                                      |
 | `busConfigMap.name`                         | `selenium-event-bus-config`                 | Name of the configmap that contains SE_EVENT_BUS_HOST, SE_EVENT_BUS_PUBLISH_PORT and SE_EVENT_BUS_SUBSCRIBE_PORT variables |
+| `busConfigMap.annotations`                  | `{}`                                        | Custom annotations for configmap                                                                                           |
+| `nodeConfigMap.name`                        | `selenium-node-config`                      | Name of the configmap that contains common environment variables for browser nodes                                         |
+| `nodeConfigMap.annotations`                 | `{}`                                        | Custom annotations for configmap                                                                                           |
 | `ingress.enabled`                           | `true`                                      | Enable or disable ingress resource                                                                                         |
 | `ingress.className`                         | `""`                                        | Name of ingress class to select which controller will implement ingress resource                                           |
 | `ingress.annotations`                       | `{}`                                        | Custom annotations for ingress resource                                                                                    |
 | `ingress.hostname`                          | `selenium-grid.local`                       | Default host for the ingress resource                                                                                      |
 | `ingress.path`                              | `/`                                         | Default host path for the ingress resource                                                                                 |
 | `ingress.tls`                               | `[]`                                        | TLS backend configuration for ingress resource                                                                             |
-| `busConfigMap.annotations`                  | `{}`                                        | Custom annotations for configmap                                                                                           |
 | `autoscaling.enableWithExistingKEDA`        | `false`                                     | Enable autoscaling of browser nodes.                                                                                       |
 | `autoscaling.enabled`                       | `false`                                     | Same as above plus installation of KEDA                                                                                    |
 | `autoscaling.scalingType`                   | `job`                                       | Which typ of KEDA scaling to use: job or deployment                                                                        |
@@ -103,7 +105,7 @@ This table contains the configuration parameters of the chart and their default 
 | `chromeNode.deploymentEnabled`              | `true`                                      | Enable creation of Deployment for chrome nodes                                                                             |
 | `chromeNode.replicas`                       | `1`                                         | Number of chrome nodes                                                                                                     |
 | `chromeNode.imageName`                      | `selenium/node-chrome`                      | Image of chrome nodes                                                                                                      |
-| `chromeNode.imageTag`                       | `4.9.1-20230508`                            | Image of chrome nodes                                                                                                      |
+| `chromeNode.imageTag`                       | `4.10.0-20230607`                           | Image of chrome nodes                                                                                                      |
 | `chromeNode.imagePullPolicy`                | `IfNotPresent`                              | Image pull policy (see https://kubernetes.io/docs/concepts/containers/images/#updating-images)                             |
 | `chromeNode.imagePullSecret`                | `""`                                        | Image pull secret (see https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry)               |
 | `chromeNode.ports`                          | `[5555]`                                    | Port list to enable on container                                                                                           |
@@ -118,7 +120,7 @@ This table contains the configuration parameters of the chart and their default 
 | `chromeNode.affinity`                       | `{}`                                        | Affinity for chrome-node pods                                                                                              |
 | `chromeNode.hostAliases`                    | `nil`                                       | Custom host aliases for chrome nodes                                                                                       |
 | `chromeNode.priorityClassName`              | `""`                                        | Priority class name for chrome-node pods                                                                                   |
-| `chromeNode.extraEnvironmentVariables`      | See `values.yaml`                           | Environment variables for chrome nodes                                                                                     |
+| `chromeNode.extraEnvironmentVariables`      | `nil`                                       | Custom environment variables for chrome nodes                                                                              |
 | `chromeNode.extraEnvFrom`                   | `nil`                                       | Custom environment taken from `configMap` or `secret` variables for chrome nodes                                           |
 | `chromeNode.service.enabled`                | `true`                                      | Create a service for node                                                                                                  |
 | `chromeNode.service.type`                   | `ClusterIP`                                 | Service type                                                                                                               |
@@ -137,7 +139,7 @@ This table contains the configuration parameters of the chart and their default 
 | `firefoxNode.deploymentEnabled`             | `true`                                      | Enable creation of Deployment for firefox nodes                                                                            |
 | `firefoxNode.replicas`                      | `1`                                         | Number of firefox nodes                                                                                                    |
 | `firefoxNode.imageName`                     | `selenium/node-firefox`                     | Image of firefox nodes                                                                                                     |
-| `firefoxNode.imageTag`                      | `4.9.1-20230508`                            | Image of firefox nodes                                                                                                     |
+| `firefoxNode.imageTag`                      | `4.10.0-20230607`                           | Image of firefox nodes                                                                                                     |
 | `firefoxNode.imagePullPolicy`               | `IfNotPresent`                              | Image pull policy (see https://kubernetes.io/docs/concepts/containers/images/#updating-images)                             |
 | `firefoxNode.imagePullSecret`               | `""`                                        | Image pull secret (see https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry)               |
 | `firefoxNode.ports`                         | `[5555]`                                    | Port list to enable on container                                                                                           |
@@ -152,7 +154,7 @@ This table contains the configuration parameters of the chart and their default 
 | `firefoxNode.affinity`                      | `{}`                                        | Affinity for firefox-node pods                                                                                             |
 | `firefoxNode.hostAliases`                   | `nil`                                       | Custom host aliases for firefox nodes                                                                                      |
 | `firefoxNode.priorityClassName`             | `""`                                        | Priority class name for firefox-node pods                                                                                  |
-| `firefoxNode.extraEnvironmentVariables`     | See `values.yaml`                           | Environment variables for firefox nodes                                                                                    |
+| `firefoxNode.extraEnvironmentVariables`     | `nil`                                       | Custom environment variables for firefox nodes                                                                             |
 | `firefoxNode.extraEnvFrom`                  | `nil`                                       | Custom environment variables taken from `configMap` or `secret` for firefox nodes                                          |
 | `firefoxNode.service.enabled`               | `true`                                      | Create a service for node                                                                                                  |
 | `firefoxNode.service.type`                  | `ClusterIP`                                 | Service type                                                                                                               |
@@ -171,7 +173,7 @@ This table contains the configuration parameters of the chart and their default 
 | `edgeNode.deploymentEnabled`                | `true`                                      | Enable creation of Deployment for edge nodes                                                                               |
 | `edgeNode.replicas`                         | `1`                                         | Number of edge nodes                                                                                                       |
 | `edgeNode.imageName`                        | `selenium/node-edge`                        | Image of edge nodes                                                                                                        |
-| `edgeNode.imageTag`                         | `4.9.1-20230508`                            | Image of edge nodes                                                                                                        |
+| `edgeNode.imageTag`                         | `4.10.0-20230607`                           | Image of edge nodes                                                                                                        |
 | `edgeNode.imagePullPolicy`                  | `IfNotPresent`                              | Image pull policy (see https://kubernetes.io/docs/concepts/containers/images/#updating-images)                             |
 | `edgeNode.imagePullSecret`                  | `""`                                        | Image pull secret (see https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry)               |
 | `edgeNode.ports`                            | `[5555]`                                    | Port list to enable on container                                                                                           |
@@ -186,7 +188,7 @@ This table contains the configuration parameters of the chart and their default 
 | `edgeNode.affinity`                         | `{}`                                        | Affinity for edge-node pods                                                                                                |
 | `edgeNode.hostAliases`                      | `nil`                                       | Custom host aliases for edge nodes                                                                                         |
 | `edgeNode.priorityClassName`                | `""`                                        | Priority class name for edge-node pods                                                                                     |
-| `edgeNode.extraEnvironmentVariables`        | See `values.yaml`                           | Environment variables for firefox nodes                                                                                    |
+| `edgeNode.extraEnvironmentVariables`        | `nil`                                       | Custom environment variables for firefox nodes                                                                             |
 | `edgeNode.extraEnvFrom`                     | `nil`                                       | Custom environment taken from `configMap` or `secret` variables for firefox nodes                                          |
 | `edgeNode.service.enabled`                  | `true`                                      | Create a service for node                                                                                                  |
 | `edgeNode.service.type`                     | `ClusterIP`                                 | Service type                                                                                                               |
@@ -216,33 +218,31 @@ https://github.com/kedacore/charts/blob/main/keda/README.md for more details.
 
 You can configure the Selenium Hub with this values:
 
-| Parameter                       | Default            | Description                                                                                                                                      |
-|---------------------------------|--------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
-| `hub.imageName`                 | `selenium/hub`     | Selenium Hub image name                                                                                                                          |
-| `hub.imageTag`                  | `nil`              | Selenium Hub image tag (this overwrites `.global.seleniumGrid.imageTag` value)                                                                   |
-| `hub.imagePullPolicy`           | `IfNotPresent`     | Image pull policy (see https://kubernetes.io/docs/concepts/containers/images/#updating-images)                                                   |
-| `hub.imagePullSecret`           | `""`               | Image pull secret (see https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry)                                     |
-| `hub.annotations`               | `{}`               | Custom annotations for Selenium Hub pod                                                                                                          |
-| `hub.labels`                    | `{}`               | Custom labels for Selenium Hub pod                                                                                                               |
-| `hub.publishPort`               | `4442`             | Port where events are published                                                                                                                  |
-| `hub.subscribePort`             | `4443`             | Port where to subscribe for events                                                                                                               |
-| `hub.port`                      | `4444`             | Selenium Hub port                                                                                                                                |
-| `hub.livenessProbe`             | `See values.yaml`  | Liveness probe settings                                                                                                                          |
-| `hub.readinessProbe`            | `See values.yaml`  | Readiness probe settings                                                                                                                         |
-| `hub.tolerations`               | `[]`               | Tolerations for selenium-hub pods                                                                                                                |
-| `hub.nodeSelector`              | `{}`               | Node Selector for selenium-hub pods                                                                                                              |
-| `hub.affinity`                  | `{}`                        | Affinity for 
-selenium-hub 
-pods                                                                                         |
-| `hub.priorityClassName`         | `""`               | Priority class name for selenium-hub pods                                                                                                        |
-| `hub.subPath`                   | `/`                | Custom sub path for the hub deployment                                                                                                           |
-| `hub.extraEnvironmentVariables` | `nil`              | Custom environment variables for selenium-hub                                                                                                    |
-| `hub.extraEnvFrom`              | `nil`              | Custom environment variables for selenium taken from `configMap` or `secret`-hub                                                                 |
-| `hub.resources`                 | `{}`               | Resources for selenium-hub container                                                                                                             |
-| `hub.securityContext`           | `See values.yaml`  | Security context for selenium-hub container                                                                                                      |
-| `hub.serviceType`               | `ClusterIP`        | Kubernetes service type (see https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types)                 |
-| `hub.loadBalancerIP`            | `nil`              | Set specific loadBalancerIP when serviceType is LoadBalancer (see https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer) |
-| `hub.serviceAnnotations`        | `{}`               | Custom annotations for Selenium Hub service                                                                                                      |
+| Parameter                       | Default           | Description                                                                                                                                      |
+|---------------------------------|-------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
+| `hub.imageName`                 | `selenium/hub`    | Selenium Hub image name                                                                                                                          |
+| `hub.imageTag`                  | `nil`             | Selenium Hub image tag (this overwrites `.global.seleniumGrid.imageTag` value)                                                                   |
+| `hub.imagePullPolicy`           | `IfNotPresent`    | Image pull policy (see https://kubernetes.io/docs/concepts/containers/images/#updating-images)                                                   |
+| `hub.imagePullSecret`           | `""`              | Image pull secret (see https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry)                                     |
+| `hub.annotations`               | `{}`              | Custom annotations for Selenium Hub pod                                                                                                          |
+| `hub.labels`                    | `{}`              | Custom labels for Selenium Hub pod                                                                                                               |
+| `hub.publishPort`               | `4442`            | Port where events are published                                                                                                                  |
+| `hub.subscribePort`             | `4443`            | Port where to subscribe for events                                                                                                               |
+| `hub.port`                      | `4444`            | Selenium Hub port                                                                                                                                |
+| `hub.livenessProbe`             | `See values.yaml` | Liveness probe settings                                                                                                                          |
+| `hub.readinessProbe`            | `See values.yaml` | Readiness probe settings                                                                                                                         |
+| `hub.tolerations`               | `[]`              | Tolerations for selenium-hub pods                                                                                                                |
+| `hub.nodeSelector`              | `{}`              | Node Selector for selenium-hub pods                                                                                                              |
+| `hub.affinity`                  | `{}`              | Affinity for selenium-hub pods                                                                                                                   |
+| `hub.priorityClassName`         | `""`              | Priority class name for selenium-hub pods                                                                                                        |
+| `hub.subPath`                   | `/`               | Custom sub path for the hub deployment                                                                                                           |
+| `hub.extraEnvironmentVariables` | `nil`             | Custom environment variables for selenium-hub                                                                                                    |
+| `hub.extraEnvFrom`              | `nil`             | Custom environment variables for selenium taken from `configMap` or `secret`-hub                                                                 |
+| `hub.resources`                 | `{}`              | Resources for selenium-hub container                                                                                                             |
+| `hub.securityContext`           | `See values.yaml` | Security context for selenium-hub container                                                                                                      |
+| `hub.serviceType`               | `ClusterIP`       | Kubernetes service type (see https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types)                 |
+| `hub.loadBalancerIP`            | `nil`             | Set specific loadBalancerIP when serviceType is LoadBalancer (see https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer) |
+| `hub.serviceAnnotations`        | `{}`              | Custom annotations for Selenium Hub service                                                                                                      |
 
 
 ### Configuration for isolated components
@@ -266,9 +266,7 @@ If you implement selenium-grid with separate components (`isolateComponents: tru
 | `components.router.serviceAnnotations`       | `{}`                     | Custom annotations for router service                                                                                                            |
 | `components.router.tolerations`              | `[]`                     | Tolerations for router pods                                                                                                                      |
 | `components.router.nodeSelector`             | `{}`                     | Node Selector for router pods                                                                                                                    |
-| `components.router.affinity`                 | `{}`                        | Affinity for 
-router 
-pods                                                                                         |
+| `components.router.affinity`                 | `{}`                     | Affinity for router pods                                                                                                                         |
 | `components.router.priorityClassName`        | `""`                     | Priority class name for router pods                                                                                                              |
 | `components.distributor.imageName`           | `selenium/distributor`   | Distributor image name                                                                                                                           |
 | `components.distributor.imageTag`            | `nil`                    | Distributor image tag  (this overwrites `.global.seleniumGrid.imageTag` value)                                                                   |
@@ -282,9 +280,7 @@ pods                                                                            
 | `components.distributor.serviceAnnotations`  | `{}`                     | Custom annotations for Distributor service                                                                                                       |
 | `components.distributor.tolerations`         | `[]`                     | Tolerations for Distributor pods                                                                                                                 |
 | `components.distributor.nodeSelector`        | `{}`                     | Node Selector for Distributor pods                                                                                                               |
-| `components.distributor.affinity`                 | `{}`                        | Affinity for 
-Distributor 
-pods                                                                                         |
+| `components.distributor.affinity`            | `{}`                     | Affinity for Distributor pods                                                                                                                    |
 | `components.distributor.priorityClassName`   | `""`                     | Priority class name for Distributor pods                                                                                                         |
 | `components.eventBus.imageName`              | `selenium/event-bus`     | Event Bus image name                                                                                                                             |
 | `components.eventBus.imageTag`               | `nil`                    | Event Bus image tag  (this overwrites `.global.seleniumGrid.imageTag` value)                                                                     |
@@ -300,9 +296,7 @@ pods                                                                            
 | `components.eventBus.serviceAnnotations`     | `{}`                     | Custom annotations for Event Bus service                                                                                                         |
 | `components.eventBus.tolerations`            | `[]`                     | Tolerations for Event Bus pods                                                                                                                   |
 | `components.eventBus.nodeSelector`           | `{}`                     | Node Selector for Event Bus pods                                                                                                                 |
-| `components.eventBus.affinity`               | `{}`                        | Affinity for 
-Event Bus 
-pods                                                                                         |
+| `components.eventBus.affinity`               | `{}`                     | Affinity for Event Bus pods                                                                                                                      |
 | `components.eventBus.priorityClassName`      | `""`                     | Priority class name for Event Bus pods                                                                                                           |
 | `components.sessionMap.imageName`            | `selenium/sessions`      | Session Map image name                                                                                                                           |
 | `components.sessionMap.imageTag`             | `nil`                    | Session Map image tag  (this overwrites `.global.seleniumGrid.imageTag` value)                                                                   |
@@ -315,9 +309,7 @@ pods                                                                            
 | `components.sessionMap.serviceAnnotations`   | `{}`                     | Custom annotations for Session Map service                                                                                                       |
 | `components.sessionMap.tolerations`          | `[]`                     | Tolerations for Session Map pods                                                                                                                 |
 | `components.sessionMap.nodeSelector`         | `{}`                     | Node Selector for Session Map pods                                                                                                               |
-| `components.sessionMap.affinity`             | `{}`                        | Affinity for 
-Session Map 
-pods                                                                                         |
+| `components.sessionMap.affinity`             | `{}`                     | Affinity for Session Map pods                                                                                                                    |
 | `components.sessionMap.priorityClassName`    | `""`                     | Priority class name for Session Map pods                                                                                                         |
 | `components.sessionQueue.imageName`          | `selenium/session-queue` | Session Queue image name                                                                                                                         |
 | `components.sessionQueue.imageTag`           | `nil`                    | Session Queue image tag  (this overwrites `.global.seleniumGrid.imageTag` value)                                                                 |
@@ -331,9 +323,7 @@ pods                                                                            
 | `components.sessionQueue.serviceAnnotations` | `{}`                     | Custom annotations for Session Queue service                                                                                                     |
 | `components.sessionQueue.tolerations`        | `[]`                     | Tolerations for Session Queue pods                                                                                                               |
 | `components.sessionQueue.nodeSelector`       | `{}`                     | Node Selector for Session Queue pods                                                                                                             |
-| `components.sessionQueue.affinity`             | `{}`                        | Affinity for 
-Session Queue 
-pods                                                                                         |
+| `components.sessionQueue.affinity`           | `{}`                     | Affinity for Session Queue pods                                                                                                                  |
 | `components.sessionQueue.priorityClassName`  | `""`                     | Priority class name for Session Queue pods                                                                                                       |
 | `components.subPath`                         | `/`                      | Custom sub path for all components                                                                                                               |
 | `components.extraEnvironmentVariables`       | `nil`                    | Custom environment variables for all components                                                                                                  |

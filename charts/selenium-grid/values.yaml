@@ -1,9 +1,9 @@
 global:
   seleniumGrid:
     # Image tag for all selenium components
-    imageTag: 4.9.1-20230508
+    imageTag: 4.10.0-20230607
     # Image tag for browser's nodes
-    nodesImageTag: 4.9.1-20230508
+    nodesImageTag: 4.10.0-20230607
     # Pull secret for all components, can be overridden individually
     imagePullSecret: ""
 
@@ -33,6 +33,12 @@ busConfigMap:
   # Custom annotations for configmap
   annotations: {}
 
+# ConfigMap that contains common environment variables for browser nodes
+nodeConfigMap:
+  name: selenium-node-config
+  # Custom annotations for configmap
+  annotations: {}
+
 # Configuration for isolated components (applied only if `isolateComponents: true`)
 components:
 
@@ -41,7 +47,7 @@ components:
     # Router image name
     imageName: selenium/router
     # Router image tag (this overwrites global.seleniumGrid.imageTag parameter)
-    # imageTag: 4.9.1-20230508
+    # imageTag: 4.10.0-20230607
 
     # Image pull policy (see https://kubernetes.io/docs/concepts/containers/images/#updating-images)
     imagePullPolicy: IfNotPresent
@@ -92,7 +98,7 @@ components:
     # Distributor image name
     imageName: selenium/distributor
     # Distributor image tag (this overwrites global.seleniumGrid.imageTag parameter)
-    # imageTag: 4.9.1-20230508
+    # imageTag: 4.10.0-20230607
 
     # Image pull policy (see https://kubernetes.io/docs/concepts/containers/images/#updating-images)
     imagePullPolicy: IfNotPresent
@@ -123,7 +129,7 @@ components:
     # Event Bus image name
     imageName: selenium/event-bus
     # Event Bus image tag (this overwrites global.seleniumGrid.imageTag parameter)
-    # imageTag: 4.9.1-20230508
+    # imageTag: 4.10.0-20230607
 
     # Image pull policy (see https://kubernetes.io/docs/concepts/containers/images/#updating-images)
     imagePullPolicy: IfNotPresent
@@ -158,7 +164,7 @@ components:
     # Session Map image name
     imageName: selenium/sessions
     # Session Map image tag (this overwrites global.seleniumGrid.imageTag parameter)
-    # imageTag: 4.9.1-20230508
+    # imageTag: 4.10.0-20230607
 
     # Image pull policy (see https://kubernetes.io/docs/concepts/containers/images/#updating-images)
     imagePullPolicy: IfNotPresent
@@ -188,7 +194,7 @@ components:
     # Session Queue image name
     imageName: selenium/session-queue
     # Session Queue image tag (this overwrites global.seleniumGrid.imageTag parameter)
-    # imageTag: 4.9.1-20230508
+    # imageTag: 4.10.0-20230607
 
     # Image pull policy (see https://kubernetes.io/docs/concepts/containers/images/#updating-images)
     imagePullPolicy: IfNotPresent
@@ -238,7 +244,7 @@ hub:
   # Selenium Hub image name
   imageName: selenium/hub
   # Selenium Hub image tag (this overwrites global.seleniumGrid.imageTag parameter)
-  # imageTag: 4.9.1-20230508
+  # imageTag: 4.10.0-20230607
   # Image pull policy (see https://kubernetes.io/docs/concepts/containers/images/#updating-images)
   imagePullPolicy: IfNotPresent
   # Image pull secret (see https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/)
@@ -354,7 +360,7 @@ chromeNode:
   # Image of chrome nodes
   imageName: selenium/node-chrome
   # Image of chrome nodes (this overwrites global.seleniumGrid.nodesImageTag)
-  # imageTag: 4.9.1-20230508
+  # imageTag: 4.10.0-20230607
   # Image pull policy (see https://kubernetes.io/docs/concepts/containers/images/#updating-images)
   imagePullPolicy: IfNotPresent
   # Image pull secret (see https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/)
@@ -470,7 +476,7 @@ firefoxNode:
   # Image of firefox nodes
   imageName: selenium/node-firefox
   # Image of firefox nodes (this overwrites global.seleniumGrid.nodesImageTag)
-  # imageTag: 4.9.1-20230508
+  # imageTag: 4.10.0-20230607
   # Image pull policy (see https://kubernetes.io/docs/concepts/containers/images/#updating-images)
   imagePullPolicy: IfNotPresent
   # Image pull secret (see https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/)
@@ -583,7 +589,7 @@ edgeNode:
   # Image of edge nodes
   imageName: selenium/node-edge
   # Image of edge nodes (this overwrites global.seleniumGrid.nodesImageTag)
-  # imageTag: 4.9.1-20230508
+  # imageTag: 4.10.0-20230607
   # Image pull policy (see https://kubernetes.io/docs/concepts/containers/images/#updating-images)
   imagePullPolicy: IfNotPresent
   # Image pull secret (see https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/)
@@ -685,6 +691,9 @@ videoRecorder:
   # Image of video recorder
   imageName: selenium/video
   enabled: false
+  # Where to upload the video file. Should be set to something like 's3://myvideobucket/'
+  uploadDestinationPrefix: ""
+  # What uploader to use. See .videRecorder.s3 for how to create a new one.
   uploader: s3
 
   # Image of video recorder
@@ -702,12 +711,6 @@ videoRecorder:
       memory: "1Gi"
       cpu: "1"
   extraEnvironmentVariables: []
-  # - name: UPLOAD_DESTINATION_FOLDER
-  #   value: s3://myvideobucket/
-  # - name: DISPLAY_CONTAINER_NAME
-  #   value: localhost
-  # - name: DISPLAY_CONTAINER_PORT
-  #   value: "5555"
   # - name: VIDEO_LOCATION
   #   value: /videos
   # Custom environment variables by sourcing entire configMap, Secret, etc. for video recorder.
