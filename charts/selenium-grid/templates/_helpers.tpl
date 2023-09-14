@@ -267,13 +267,13 @@ template:
     {{- if .node.extraVolumes }}
       {{ toYaml .node.extraVolumes | nindent 6 }}
     {{- end }}
-  {{- if .Values.videoRecorder.enabled }}
-    - name: video-scripts
-      configMap:
-        name: {{ template "seleniumGrid.video.fullname" . }}
-        defaultMode: 0500
-    - name: video
-    {{- toYaml .Values.videoRecorder.volume | nindent 6 }}
+    {{- if .Values.videoRecorder.enabled }}
+      - name: video-scripts
+        configMap:
+          name: {{ template "seleniumGrid.video.fullname" . }}
+          defaultMode: 0500
+      - name: video
+      {{- toYaml .Values.videoRecorder.volume | nindent 6 }}
   {{- end }}
 {{- end -}}
 
