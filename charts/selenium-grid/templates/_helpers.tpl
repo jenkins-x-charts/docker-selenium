@@ -273,7 +273,7 @@ template:
           name: {{ template "seleniumGrid.video.fullname" . }}
           defaultMode: 0500
       - name: video
-      {{- toYaml .Values.videoRecorder.volume | nindent 6 }}
+      {{- toYaml .Values.videoRecorder.volume | nindent 8 }}
   {{- end }}
 {{- end -}}
 
