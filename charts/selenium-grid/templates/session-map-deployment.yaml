@@ -24,6 +24,8 @@ spec:
       annotations: {{- toYaml . | nindent 8 }}
     {{- end }}
     spec:
+      serviceAccountName: {{ template "seleniumGrid.serviceAccount.fullname" . }}
+      serviceAccount: {{ template "seleniumGrid.serviceAccount.fullname" . }}
       containers:
         - name: selenium-session-map
           {{- $imageTag := default .Values.global.seleniumGrid.imageTag .Values.components.sessionMap.imageTag }}
@@ -44,12 +46,18 @@ spec:
         {{- with .Values.components.sessionMap.resources }}
           resources: {{- toYaml . | nindent 12 }}
         {{- end }}
+        {{- with .Values.components.sessionMap.securityContext }}
+          securityContext: {{- toYaml . | nindent 12 }}
+        {{- end }}
     {{- with .Values.components.sessionMap.nodeSelector }}
       nodeSelector: {{- toYaml . | nindent 8 }}
     {{- end }}
+    {{- if or .Values.global.seleniumGrid.affinity .Values.components.sessionMap.affinity }}
+      {{- $affinityYaml := default .Values.global.seleniumGrid.affinity .Values.components.sessionMap.affinity }}
+      affinity: {{- toYaml $affinityYaml | nindent 8 }}
+    {{- end }}      
     {{- with .Values.components.sessionMap.tolerations }}
-      tolerations:
-        {{ toYaml . | nindent 6 }}
+      tolerations: {{ toYaml . | nindent 6 }}
     {{- end }}
     {{- if or .Values.global.seleniumGrid.imagePullSecret .Values.components.sessionMap.imagePullSecret }}
       imagePullSecrets:

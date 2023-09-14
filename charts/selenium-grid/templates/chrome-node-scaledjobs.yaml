@@ -1,31 +1,31 @@
-{{- if and .Values.firefoxNode.enabled (eq (include "seleniumGrid.useKEDA" .) "true") (eq .Values.autoscaling.scalingType "job") }}
+{{- if and .Values.chromeNode.enabled (include "seleniumGrid.useKEDA" .) (eq .Values.autoscaling.scalingType "job") }}
 apiVersion: keda.sh/v1alpha1
 kind: ScaledJob
 metadata:
-  name: {{ template "seleniumGrid.firefoxNode.fullname" . }}
+  name: {{ template "seleniumGrid.chromeNode.fullname" . }}
   namespace: {{ .Release.Namespace }}
   annotations:
     {{- with .Values.autoscaling.annotations }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
   labels:
-    app: selenium-firefox-node
-    app.kubernetes.io/name: selenium-firefox-node
+    app: selenium-chrome-node
+    app.kubernetes.io/name: selenium-chrome-node
     {{- include "seleniumGrid.commonLabels" . | nindent 4 }}
-    {{- with .Values.firefoxNode.labels }}
+    {{- with .Values.chromeNode.labels }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
     {{- with .Values.customLabels }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  maxReplicaCount: {{ .Values.firefoxNode.maxReplicaCount }}
+  maxReplicaCount: {{ .Values.chromeNode.maxReplicaCount }}
   {{- with .Values.autoscaling.scaledJobOptions -}}
     {{ toYaml . | nindent 2 }}
   {{- end }}
   triggers:
     - type: selenium-grid
-    {{- with .Values.firefoxNode.hpa }}
+    {{- with .Values.chromeNode.hpa }}
       metadata: {{- tpl (toYaml .) $ | nindent 8 }}
     {{- end }}
   jobTargetRef:
@@ -33,8 +33,8 @@ spec:
     completions: 1
     backoffLimit: 0
 {{- $podScope := deepCopy . -}}
-{{- $_ := set $podScope "name" "selenium-firefox-node" -}}
-{{- $_ =  set $podScope "node" .Values.firefoxNode  -}}
+{{- $_ := set $podScope "name" "selenium-chrome-node" -}}
+{{- $_ =  set $podScope "node" .Values.chromeNode  -}}
 {{- $_ =  set $podScope "uploader" (get .Values.videoRecorder .Values.videoRecorder.uploader) -}}
 {{- include "seleniumGrid.podTemplate" $podScope | nindent 4 }}
 {{- end }}
