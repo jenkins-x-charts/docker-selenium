@@ -43,6 +43,7 @@ data:
     recording_started="false"
     video_file_name=""
     video_file=""
+    prev_session_id=""
     attempts=0
     echo Checking if node API responds
     until curl -s --request GET http://localhost:5555/status || [[ $attempts = $max_attempts ]]
@@ -68,7 +69,7 @@ data:
             ffmpeg -nostdin -y -f x11grab -video_size ${VIDEO_SIZE} -r ${FRAME_RATE} -i ${DISPLAY} -codec:v ${CODEC} ${PRESET} -pix_fmt yuv420p $video_file &
             recording_started="true"
             echo "Video recording started"
-        elif [[ ( "$session_id" = "null" || "$session_id" = "" ) && "$recording_started" = "true" ]]
+        elif [[ "$session_id" != "$prev_session_id && "$recording_started" = "true" ]]
         then
             echo "Stopping to record video"
             kill -INT %1
@@ -80,10 +81,12 @@ data:
         elif [[ $recording_started = "true" ]]
         then
             echo "Video recording in progress"
+            sleep 1
         else
             echo "No session in progress"
+            sleep 1
         fi
-        sleep 1
+        prev_session_id=$session_id
     done
     echo
 {{- end }}

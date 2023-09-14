@@ -81,6 +81,13 @@ Ingress fullname
 {{- end -}}
 
 {{/*
+Service Account fullname
+*/}}
+{{- define "seleniumGrid.serviceAccount.fullname" -}}
+{{- .Values.serviceAccount.name | default "selenium-serviceaccount" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
 Video ConfigMap fullname
 */}}
 {{- define "seleniumGrid.video.fullname" -}}
@@ -117,6 +124,8 @@ template:
         {{ toYaml . | nindent 6 }}
       {{- end }}
   spec:
+    serviceAccountName: {{ template "seleniumGrid.serviceAccount.fullname" . }}
+    serviceAccount: {{ template  "seleniumGrid.serviceAccount.fullname" . }}
     restartPolicy: {{ and (eq (include "seleniumGrid.useKEDA" .) "true") (eq .Values.autoscaling.scalingType "job") | ternary "Never" "Always" }}
     serviceAccount: {{ .Values.serviceAccount.name }}
   {{- with .node.hostAliases }}
@@ -154,10 +163,19 @@ template:
       {{- with .node.resources }}
         resources: {{- toYaml . | nindent 10 }}
       {{- end }}
+      {{- with .node.securityContext }}
+        securityContext: {{- toYaml . | nindent 10 }}
+      {{- end }}
       {{- include "seleniumGrid.lifecycle" . | nindent 8 -}}
       {{- with .node.startupProbe }}
         startupProbe: {{- toYaml . | nindent 10 }}
       {{- end }}
+      {{- with .node.livenessProbe }}
+        livenessProbe: {{- toYaml . | nindent 10 }}
+      {{- end }}
+    {{- if .node.sidecars }}
+      {{- toYaml .node.sidecars | nindent 6 }}
+    {{- end }}
     {{- if .Values.videoRecorder.enabled }}
       - name: video
         image: {{ printf "%s:%s" .Values.videoRecorder.imageName .Values.videoRecorder.imageTag }}
@@ -242,13 +260,13 @@ template:
   {{- end }}
     terminationGracePeriodSeconds: {{ .node.terminationGracePeriodSeconds }}
     volumes:
-    - name: dshm
-      emptyDir:
-        medium: Memory
-        sizeLimit: {{ default "1Gi" .node.dshmVolumeSizeLimit }}
-  {{- if .node.extraVolumes }}
-    {{ toYaml .node.extraVolumes | nindent 4 }}
-  {{- end }}
+      - name: dshm
+        emptyDir:
+          medium: Memory
+          sizeLimit: {{ default "1Gi" .node.dshmVolumeSizeLimit }}
+    {{- if .node.extraVolumes }}
+      {{ toYaml .node.extraVolumes | nindent 6 }}
+    {{- end }}
   {{- if .Values.videoRecorder.enabled }}
     - name: video-scripts
       configMap:
@@ -264,9 +282,9 @@ Get the url of the grid. If the external url can be figured out from the ingress
 */}}
 {{- define "seleniumGrid.url" -}}
 {{- if and .Values.ingress.enabled .Values.ingress.hostname (ne .Values.ingress.hostname "selenium-grid.local") -}}
-http{{if .Values.ingress.tls}}s{{end}}://{{.Values.ingress.hostname}}
+http{{if .Values.ingress.tls}}s{{end}}://{{- if eq .Values.basicAuth.enabled true}}{{ .Values.basicAuth.username}}:{{ .Values.basicAuth.password}}@{{- end}}{{.Values.ingress.hostname}}
 {{- else -}}
-http://{{ include ($.Values.isolateComponents | ternary "seleniumGrid.router.fullname" "seleniumGrid.hub.fullname") $ }}.{{ .Release.Namespace }}:{{ $.Values.components.router.port }}
+http://{{- if eq .Values.basicAuth.enabled true}}{{ .Values.basicAuth.username}}:{{ .Values.basicAuth.password}}@{{- end}}{{ include ($.Values.isolateComponents | ternary "seleniumGrid.router.fullname" "seleniumGrid.hub.fullname") $ }}.{{ .Release.Namespace }}:{{ $.Values.components.router.port }}
 {{- end }}
 {{- end -}}
 
@@ -274,7 +292,7 @@ http://{{ include ($.Values.isolateComponents | ternary "seleniumGrid.router.ful
 Graphql Url of the hub or the router
 */}}
 {{- define "seleniumGrid.graphqlURL" -}}
-http://{{ include ($.Values.isolateComponents | ternary "seleniumGrid.router.fullname" "seleniumGrid.hub.fullname") $ }}.{{ .Release.Namespace }}:{{ $.Values.components.router.port }}/graphql
+http://{{- if eq .Values.basicAuth.enabled true}}{{ .Values.basicAuth.username}}:{{ .Values.basicAuth.password}}@{{- end}}{{ include ($.Values.isolateComponents | ternary "seleniumGrid.router.fullname" "seleniumGrid.hub.fullname") $ }}.{{ .Release.Namespace }}:{{ $.Values.components.router.port }}/graphql
 {{- end -}}
 
 {{/*

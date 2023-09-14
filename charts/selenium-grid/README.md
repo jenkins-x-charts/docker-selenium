@@ -61,6 +61,14 @@ Once you have a new chart version, you can update your selenium-grid running:
 helm upgrade selenium-grid docker-selenium/selenium-grid
 ```
 
+If needed, you can add sidecars for your browser nodes by running:
+
+```bash
+helm upgrade selenium-grid docker-selenium/selenium-grid --set 'firefoxNode.enabled=true' --set-json 'firefoxNode.sidecars=[{"name":"my-sidecar","image":"my-sidecar:latest","imagePullPolicy":"IfNotPresent","ports":[{"containerPort":8080, "protocol":"TCP"}],"resources":{"limits":{"memory": "128Mi"},"requests":{"cpu": "100m"}}}]'
+```
+
+Note: the parameter used for --set-json is just an example, please refer to [Container Spec](https://www.devspace.sh/component-chart/docs/configuration/containers) for an overview of usable parameters.
+
 ## Uninstalling Selenium Grid release
 
 To uninstall:
@@ -73,19 +81,22 @@ helm uninstall selenium-grid
 
 For now, global configuration supported is:
 
-| Parameter                             | Default                            | Description                           |
-| -----------------------------------   | ---------------------------------- | ------------------------------------- |
-| `global.seleniumGrid.imageTag`        | `4.10.0-20230607`                  | Image tag for all selenium components |
-| `global.seleniumGrid.nodesImageTag`   | `4.10.0-20230607`                  | Image tag for browser's nodes         |
-| `global.seleniumGrid.imagePullSecret` | `""`                               | Pull secret to be used for all images |
-| `global.seleniumGrid.imagePullSecret` | `""`                               | Pull secret to be used for all images |
-| `global.seleniumGrid.affinity`        | `{}`                               | Affinity assigned globally            |
+| Parameter                             | Default           | Description                           |
+|---------------------------------------|-------------------|---------------------------------------|
+| `global.seleniumGrid.imageTag`        | `4.12.1-20230912` | Image tag for all selenium components |
+| `global.seleniumGrid.nodesImageTag`   | `4.12.1-20230912` | Image tag for browser's nodes         |
+| `global.seleniumGrid.imagePullSecret` | `""`              | Pull secret to be used for all images |
+| `global.seleniumGrid.imagePullSecret` | `""`              | Pull secret to be used for all images |
+| `global.seleniumGrid.affinity`        | `{}`              | Affinity assigned globally            |
 
 This table contains the configuration parameters of the chart and their default values:
 
 | Parameter                                   | Default                                     | Description                                                                                                                |
-| ---------------------------------------     | ----------------------------------          | -------------------------------------------------------------------------------------------------------------------------- |
+|---------------------------------------------|---------------------------------------------|----------------------------------------------------------------------------------------------------------------------------|
 | `isolateComponents`                         | `false`                                     | Deploy Router, Distributor, EventBus, SessionMap and Nodes separately                                                      |
+| `serviceAccount.create`                     | `true`                                      | Enable or disable creation of service account (if `false`, `serviceAccount.name` MUST be specified                         |
+| `serviceAccount.name`                       | `""`                                        | Name of the service account to be made or existing service account to use for all deployments and jobs                     |
+| `serviceAccount.annotations`                | `{}`                                        | Custom annotations for service account                                                                                     |
 | `busConfigMap.name`                         | `selenium-event-bus-config`                 | Name of the configmap that contains SE_EVENT_BUS_HOST, SE_EVENT_BUS_PUBLISH_PORT and SE_EVENT_BUS_SUBSCRIBE_PORT variables |
 | `busConfigMap.annotations`                  | `{}`                                        | Custom annotations for configmap                                                                                           |
 | `nodeConfigMap.name`                        | `selenium-node-config`                      | Name of the configmap that contains common environment variables for browser nodes                                         |
@@ -100,12 +111,12 @@ This table contains the configuration parameters of the chart and their default 
 | `autoscaling.enabled`                       | `false`                                     | Same as above plus installation of KEDA                                                                                    |
 | `autoscaling.scalingType`                   | `job`                                       | Which typ of KEDA scaling to use: job or deployment                                                                        |
 | `autoscaling.scaledJobOptions`              | See `values.yaml`                           | Options for KEDA ScaledJobs                                                                                                |
-| `autoscaling.deregisterLifecycle            | See `values.yaml`                           | Lifecycle applied to pods of deployments controlled by KEDA. Makes the node deregister from selenium hub                   |
+| `autoscaling.deregisterLifecycle`           | See `values.yaml`                           | Lifecycle applied to pods of deployments controlled by KEDA. Makes the node deregister from selenium hub                   |
 | `chromeNode.enabled`                        | `true`                                      | Enable chrome nodes                                                                                                        |
 | `chromeNode.deploymentEnabled`              | `true`                                      | Enable creation of Deployment for chrome nodes                                                                             |
-| `chromeNode.replicas`                       | `1`                                         | Number of chrome nodes                                                                                                     |
+| `chromeNode.replicas`                       | `1`                                         | Number of chrome nodes. Disabled if autoscaling is enabled.                                                                                                     |
 | `chromeNode.imageName`                      | `selenium/node-chrome`                      | Image of chrome nodes                                                                                                      |
-| `chromeNode.imageTag`                       | `4.10.0-20230607`                           | Image of chrome nodes                                                                                                      |
+| `chromeNode.imageTag`                       | `4.12.1-20230912`                           | Image of chrome nodes                                                                                                      |
 | `chromeNode.imagePullPolicy`                | `IfNotPresent`                              | Image pull policy (see https://kubernetes.io/docs/concepts/containers/images/#updating-images)                             |
 | `chromeNode.imagePullSecret`                | `""`                                        | Image pull secret (see https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry)               |
 | `chromeNode.ports`                          | `[5555]`                                    | Port list to enable on container                                                                                           |
@@ -127,6 +138,7 @@ This table contains the configuration parameters of the chart and their default 
 | `chromeNode.service.annotations`            | `{}`                                        | Custom annotations for service                                                                                             |
 | `chromeNode.dshmVolumeSizeLimit`            | `1Gi`                                       | Size limit for DSH volume mounted in container (if not set, default is "1Gi")                                              |
 | `chromeNode.startupProbe`                   | `{}`                                        | Probe to check pod is started successfully                                                                                 |
+| `chromeNode.livenessProbe`                  | `{}`                                        | Liveness probe settings                                                                                                    |
 | `chromeNode.terminationGracePeriodSeconds`  | `30`                                        | Time to graceful terminate container (default: 30s)                                                                        |
 | `chromeNode.lifecycle`                      | `{}`                                        | hooks to make pod correctly shutdown or started                                                                            |
 | `chromeNode.extraVolumeMounts`              | `[]`                                        | Extra mounts of declared ExtraVolumes into pod                                                                             |
@@ -135,11 +147,12 @@ This table contains the configuration parameters of the chart and their default 
 | `chromeNode.hpa.browserName`                | `chrome`                                    | BrowserName from the capability                                                                                            |
 | `chromeNode.hpa.browserVersion`             | ``                                          | BrowserVersion from the capability                                                                                         |
 | `chromeNode.maxReplicaCount`                | `8`                                         | Max number of replicas that this browsernode can auto scale up to                                                          |
+| `chromeNode.minReplicaCount`                | `1`                                         | Min number of replicas that this browsernode has when jobs are running                                                          |
 | `firefoxNode.enabled`                       | `true`                                      | Enable firefox nodes                                                                                                       |
 | `firefoxNode.deploymentEnabled`             | `true`                                      | Enable creation of Deployment for firefox nodes                                                                            |
-| `firefoxNode.replicas`                      | `1`                                         | Number of firefox nodes                                                                                                    |
+| `firefoxNode.replicas`                      | `1`                                         | Number of firefox nodes. Disabled if autoscaling is enabled.                                                                                                    |
 | `firefoxNode.imageName`                     | `selenium/node-firefox`                     | Image of firefox nodes                                                                                                     |
-| `firefoxNode.imageTag`                      | `4.10.0-20230607`                           | Image of firefox nodes                                                                                                     |
+| `firefoxNode.imageTag`                      | `4.12.1-20230912`                           | Image of firefox nodes                                                                                                     |
 | `firefoxNode.imagePullPolicy`               | `IfNotPresent`                              | Image pull policy (see https://kubernetes.io/docs/concepts/containers/images/#updating-images)                             |
 | `firefoxNode.imagePullSecret`               | `""`                                        | Image pull secret (see https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry)               |
 | `firefoxNode.ports`                         | `[5555]`                                    | Port list to enable on container                                                                                           |
@@ -161,6 +174,7 @@ This table contains the configuration parameters of the chart and their default 
 | `firefoxNode.service.annotations`           | `{}`                                        | Custom annotations for service                                                                                             |
 | `firefoxNode.dshmVolumeSizeLimit`           | `1Gi`                                       | Size limit for DSH volume mounted in container (if not set, default is "1Gi")                                              |
 | `firefoxNode.startupProbe`                  | `{}`                                        | Probe to check pod is started successfully                                                                                 |
+| `firefoxNode.livenessProbe`                 | `{}`                                        | Liveness probe settings                                                                                                    |
 | `firefoxNode.terminationGracePeriodSeconds` | `30`                                        | Time to graceful terminate container (default: 30s)                                                                        |
 | `firefoxNode.lifecycle`                     | `{}`                                        | hooks to make pod correctly shutdown or started                                                                            |
 | `firefoxNode.extraVolumeMounts`             | `[]`                                        | Extra mounts of declared ExtraVolumes into pod                                                                             |
@@ -169,11 +183,12 @@ This table contains the configuration parameters of the chart and their default 
 | `firefoxNode.hpa.browserName`               | `firefox`                                   | BrowserName from the capability                                                                                            |
 | `firefoxNode.hpa.browserVersion`            | ``                                          | BrowserVersion from the capability                                                                                         |
 | `firefoxNode.maxReplicaCount`               | `8`                                         | Max number of replicas that this browsernode can auto scale up to                                                          |
+| `firefoxNode.minReplicaCount`                | `1`                                         | Min number of replicas that this browsernode has when jobs are running                                                          |
 | `edgeNode.enabled`                          | `true`                                      | Enable edge nodes                                                                                                          |
 | `edgeNode.deploymentEnabled`                | `true`                                      | Enable creation of Deployment for edge nodes                                                                               |
-| `edgeNode.replicas`                         | `1`                                         | Number of edge nodes                                                                                                       |
+| `edgeNode.replicas`                         | `1`                                         | Number of edge nodes. Disabled if autoscaling is enabled.                                                                                                       |
 | `edgeNode.imageName`                        | `selenium/node-edge`                        | Image of edge nodes                                                                                                        |
-| `edgeNode.imageTag`                         | `4.10.0-20230607`                           | Image of edge nodes                                                                                                        |
+| `edgeNode.imageTag`                         | `4.12.1-20230912`                           | Image of edge nodes                                                                                                        |
 | `edgeNode.imagePullPolicy`                  | `IfNotPresent`                              | Image pull policy (see https://kubernetes.io/docs/concepts/containers/images/#updating-images)                             |
 | `edgeNode.imagePullSecret`                  | `""`                                        | Image pull secret (see https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry)               |
 | `edgeNode.ports`                            | `[5555]`                                    | Port list to enable on container                                                                                           |
@@ -195,6 +210,7 @@ This table contains the configuration parameters of the chart and their default 
 | `edgeNode.service.annotations`              | `{}`                                        | Custom annotations for service                                                                                             |
 | `edgeNode.dshmVolumeSizeLimit`              | `1Gi`                                       | Size limit for DSH volume mounted in container (if not set, default is "1Gi")                                              |
 | `edgeNode.startupProbe`                     | `{}`                                        | Probe to check pod is started successfully                                                                                 |
+| `edgeNode.livenessProbe`                    | `{}`                                        | Liveness probe settings                                                                                                    |
 | `edgeNode.terminationGracePeriodSeconds`    | `30`                                        | Time to graceful terminate container (default: 30s)                                                                        |
 | `edgeNode.lifecycle`                        | `{}`                                        | hooks to make pod correctly shutdown or started                                                                            |
 | `edgeNode.extraVolumeMounts`                | `[]`                                        | Extra mounts of declared ExtraVolumes into pod                                                                             |
@@ -203,6 +219,7 @@ This table contains the configuration parameters of the chart and their default 
 | `edgeNode.hpa.browserName`                  | `edge`                                      | BrowserName from the capability                                                                                            |
 | `edgeNode.hpa.browserVersion`               | ``                                          | BrowserVersion from the capability                                                                                         |
 | `edgeNode.maxReplicaCount`                  | `8`                                         | Max number of replicas that this browsernode can auto scale up to                                                          |
+| `edgeNode.minReplicaCount`                | `1`                                         | Min number of replicas that this browsernode has when jobs are running                                                          |
 | `customLabels`                              | `{}`                                        | Custom labels for k8s resources                                                                                            |
 | `customLabels`                              | `{}`                                        | Custom labels for k8s resources                                                                                            |
 
@@ -216,7 +233,7 @@ https://github.com/kedacore/charts/blob/main/keda/README.md for more details.
 
 ### Configuration for Selenium-Hub
 
-You can configure the Selenium Hub with this values:
+You can configure the Selenium Hub with these values:
 
 | Parameter                       | Default           | Description                                                                                                                                      |
 |---------------------------------|-------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -238,6 +255,8 @@ You can configure the Selenium Hub with this values:
 | `hub.subPath`                   | `/`               | Custom sub path for the hub deployment                                                                                                           |
 | `hub.extraEnvironmentVariables` | `nil`             | Custom environment variables for selenium-hub                                                                                                    |
 | `hub.extraEnvFrom`              | `nil`             | Custom environment variables for selenium taken from `configMap` or `secret`-hub                                                                 |
+| `hub.extraVolumeMounts`         | `[]`              | Extra mounts of declared ExtraVolumes into pod                                                                                                   |
+| `hub.extraVolumes`              | `[]`              | Extra Volumes declarations to be used in the pod (can be any supported volume type: ConfigMap, Secret, PVC, NFS, etc.)                           |
 | `hub.resources`                 | `{}`              | Resources for selenium-hub container                                                                                                             |
 | `hub.securityContext`           | `See values.yaml` | Security context for selenium-hub container                                                                                                      |
 | `hub.serviceType`               | `ClusterIP`       | Kubernetes service type (see https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types)                 |
