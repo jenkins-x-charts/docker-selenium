@@ -69,7 +69,7 @@ data:
             ffmpeg -nostdin -y -f x11grab -video_size ${VIDEO_SIZE} -r ${FRAME_RATE} -i ${DISPLAY} -codec:v ${CODEC} ${PRESET} -pix_fmt yuv420p $video_file &
             recording_started="true"
             echo "Video recording started"
-        elif [[ "$session_id" != "$prev_session_id && "$recording_started" = "true" ]]
+        elif [[ "$session_id" != "$prev_session_id" && "$recording_started" = "true" ]]
         then
             echo "Stopping to record video"
             kill -INT %1
